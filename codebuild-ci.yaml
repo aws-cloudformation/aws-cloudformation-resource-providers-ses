@@ -40,7 +40,7 @@ Resources:
   AWSCloudFormationResourceProviderCIRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: codebuild-aws-cloudformation-resource-provider-ci-role
+      RoleName: !Sub "codebuild-${GitHubRepositoryName}-ci-role"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
