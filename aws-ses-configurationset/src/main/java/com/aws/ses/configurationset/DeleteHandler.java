@@ -6,7 +6,7 @@ import com.aws.cfn.proxy.ProgressEvent;
 import com.aws.cfn.proxy.OperationStatus;
 import com.aws.cfn.proxy.ResourceHandlerRequest;
 
-public class ReadHandler extends BaseHandler<CallbackContext> {
+public class DeleteHandler extends BaseHandler<CallbackContext> {
 
     @Override
     public ProgressEvent<ResourceModel, CallbackContext> handleRequest(
@@ -19,9 +19,9 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
 
         // TODO : put your code here
 
-        final ProgressEvent<ResourceModel, CallbackContext> pe = new ProgressEvent<>();
-        pe.setResourceModel(model);
-        pe.setStatus(OperationStatus.SUCCESS);
-        return pe;
+        return ProgressEvent.<ResourceModel, CallbackContext>builder()
+            .resourceModel(model)
+            .status(OperationStatus.SUCCESS)
+            .build();
     }
 }
