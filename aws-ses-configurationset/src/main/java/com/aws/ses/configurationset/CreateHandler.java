@@ -3,7 +3,6 @@ package com.aws.ses.configurationset;
 import com.aws.cfn.proxy.AmazonWebServicesClientProxy;
 import com.aws.cfn.proxy.HandlerErrorCode;
 import com.aws.cfn.proxy.Logger;
-import com.aws.cfn.proxy.OperationStatus;
 import com.aws.cfn.proxy.ProgressEvent;
 import com.aws.cfn.proxy.ResourceHandlerRequest;
 import software.amazon.awssdk.services.ses.SesClient;
@@ -49,7 +48,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                 readResult.getResourceModel().getName().equals(model.getName())) {
 
                 this.logger.log(String.format("SES Configuration Set with Name [%s] already exists", model.getName()));
-                return new ProgressEvent<ResourceModel, CallbackContext>().defaultFailureHandler(
+                return ProgressEvent.defaultFailureHandler(
                     ConfigurationSetAlreadyExistsException.builder()
                         .message("Resource already exits.")
                         .build(),
@@ -59,7 +58,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
             // no existing resource, creation can proceed
         } catch (final Exception e) {
             this.logger.log("Pre-Create Read Failure " + e.toString());
-            return new ProgressEvent<ResourceModel, CallbackContext>().defaultFailureHandler(
+            return ProgressEvent.defaultFailureHandler(
                 e,
                 HandlerErrorCode.ServiceException);
         }
@@ -77,7 +76,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                                                                                                                  ()));
         } catch (final ConfigurationSetAlreadyExistsException e) {
             this.logger.log(String.format("SES Configuration Set with Name [%s] was already created", model.getName()));
-            return new ProgressEvent<ResourceModel, CallbackContext>().defaultFailureHandler(
+            return ProgressEvent.defaultFailureHandler(
                 // failing here would suggest a conflicting operation was performed out of band
                 ConfigurationSetAlreadyExistsException.builder()
                     .message("Resource already exits.")
@@ -85,7 +84,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                 HandlerErrorCode.AlreadyExists);
         } catch (final Exception e) {
             this.logger.log("An error occurred creating an SES Configuration Set: " + e.toString());
-            return new ProgressEvent<ResourceModel, CallbackContext>().defaultFailureHandler(
+            return ProgressEvent.defaultFailureHandler(
                 e,
                 HandlerErrorCode.ServiceException);
         }
@@ -93,7 +92,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         CallbackContext stabilizationContext = CallbackContext.builder()
             .isStabilization(true)
             .build();
-        return new ProgressEvent<ResourceModel, CallbackContext>().defaultInProgressHandler(
+        return ProgressEvent.defaultInProgressHandler(
             stabilizationContext,
             1,
             model);
@@ -109,17 +108,17 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         try {
             final ProgressEvent<ResourceModel, CallbackContext> readResult =
                 new ReadHandler().handleRequest(proxy, request, null, this.logger);
-            return new ProgressEvent<ResourceModel, CallbackContext>().defaultSuccessHandler(readResult.getResourceModel());
+            return ProgressEvent.defaultSuccessHandler(readResult.getResourceModel());
         } catch (final ConfigurationSetDoesNotExistException e) {
             // resource not yet found, re-invoke
         } catch (final Exception e) {
             this.logger.log("An error occurred stabilizing an SES Configuration Set: " + e.toString());
-            return new ProgressEvent<ResourceModel, CallbackContext>().defaultFailureHandler(
+            return ProgressEvent.defaultFailureHandler(
                 e,
                 HandlerErrorCode.ServiceException);
         }
 
-        return new ProgressEvent<ResourceModel, CallbackContext>().defaultInProgressHandler(
+        return ProgressEvent.defaultInProgressHandler(
             callbackContext,
             1,
             model);

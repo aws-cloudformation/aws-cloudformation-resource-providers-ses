@@ -46,10 +46,10 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
             logger.log(String.format("SES Configuration Set with Name [%s] deleted successfully", model.getName()));
         } catch (ConfigurationSetDoesNotExistException e) {
             logger.log(String.format("SES Configuration Set with Name [%s] is already deleted", model.getName()));
-            return new ProgressEvent<ResourceModel, CallbackContext>().defaultSuccessHandler(null);
+            return ProgressEvent.defaultSuccessHandler(null);
         } catch (Exception e) {
             this.logger.log("An error occurred deleting an SES Configuration Set: " + e.toString());
-            return new ProgressEvent<ResourceModel, CallbackContext>().defaultFailureHandler(
+            return ProgressEvent.defaultFailureHandler(
                 e,
                 HandlerErrorCode.ServiceException);
         }
@@ -57,7 +57,7 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
         CallbackContext stabilizationContext = CallbackContext.builder()
             .isStabilization(true)
             .build();
-        return new ProgressEvent<ResourceModel, CallbackContext>().defaultInProgressHandler(
+        return ProgressEvent.defaultInProgressHandler(
             stabilizationContext,
             1,
             model);
@@ -73,15 +73,15 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
         try {
             new ReadHandler().handleRequest(proxy, request, null, this.logger);
         } catch (final ConfigurationSetDoesNotExistException e) {
-            return new ProgressEvent<ResourceModel, CallbackContext>().defaultSuccessHandler(null);
+            return ProgressEvent.defaultSuccessHandler(null);
         } catch (final Exception e) {
             this.logger.log("An error occurred stabilizing an SES Configuration Set: " + e.toString());
-            return new ProgressEvent<ResourceModel, CallbackContext>().defaultFailureHandler(
+            return ProgressEvent.defaultFailureHandler(
                 e,
                 HandlerErrorCode.ServiceException);
         }
 
-        return new ProgressEvent<ResourceModel, CallbackContext>().defaultInProgressHandler(
+        return ProgressEvent.defaultInProgressHandler(
             callbackContext,
             1,
             model);
