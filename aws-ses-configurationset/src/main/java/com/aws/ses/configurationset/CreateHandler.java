@@ -6,6 +6,8 @@ import com.amazonaws.cloudformation.proxy.HandlerErrorCode;
 import com.amazonaws.cloudformation.proxy.Logger;
 import com.amazonaws.cloudformation.proxy.ProgressEvent;
 import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
+import com.amazonaws.cloudformation.resource.IdentifierUtils;
+import com.amazonaws.util.StringUtils;
 import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.ConfigurationSet;
 import software.amazon.awssdk.services.ses.model.ConfigurationSetAlreadyExistsException;
@@ -13,6 +15,8 @@ import software.amazon.awssdk.services.ses.model.ConfigurationSetDoesNotExistExc
 import software.amazon.awssdk.services.ses.model.CreateConfigurationSetRequest;
 
 public class CreateHandler extends BaseHandler<CallbackContext> {
+
+    public static final int MAX_LENGTH_CONFIGURATION_SET_NAME = 64;
 
     private AmazonWebServicesClientProxy proxy;
     private SesClient client;
@@ -38,6 +42,20 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
     private ProgressEvent<ResourceModel, CallbackContext> createConfigurationSet(
         final AmazonWebServicesClientProxy proxy,
         final ResourceHandlerRequest<ResourceModel> request) {
+
+        // resource can auto-generate a name if not supplied by caller
+        // this logic should move up into the CloudFormation engine, but
+        // currently exists here for backwards-compatibility with existing models
+        if (StringUtils.isNullOrEmpty(request.getDesiredResourceState().getName())) {
+            request.getDesiredResourceState().setName(
+                IdentifierUtils.generateResourceIdentifier(
+                    request.getLogicalResourceIdentifier(),
+                    request.getClientRequestToken(),
+                    MAX_LENGTH_CONFIGURATION_SET_NAME
+                )
+            );
+        }
+
         ResourceModel model = request.getDesiredResourceState();
 
         // pre-creation read to ensure no existing resource exists
