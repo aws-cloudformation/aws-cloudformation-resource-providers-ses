@@ -78,11 +78,11 @@ public class CreateHandlerTest {
         assertThat(response.getErrorCode(), is(nullValue()));
     }
 
-    @Test
+    @Test(expected = SdkException.class)
     public void test_HandleRequest_FailedCreate_UnknownError() {
         final CreateHandler handler = new CreateHandler();
 
-        // throw for pre-describe and then throw arbitrary error for create
+        // throw for pre-describe and then throw arbitrary error which should propagate to be handled by wrapper
         doThrow(ConfigurationSetDoesNotExistException.class)
         .doThrow(SdkException.builder().message("test error").build())
             .when(proxy)
@@ -100,22 +100,13 @@ public class CreateHandlerTest {
             .build();
 
         final ProgressEvent response = handler.handleRequest(proxy, request, null, logger);
-
-        assertThat(response, is(not(nullValue())));
-        assertThat(response.getStatus(), is(equalTo(OperationStatus.FAILED)));
-        assertThat(response.getCallbackContext(), is(nullValue()));
-        assertThat(response.getCallbackDelaySeconds(), is(equalTo(0)));
-        assertThat(response.getResourceModel(), is(nullValue()));
-        assertThat(response.getResourceModels(), is(nullValue()));
-        assertThat(response.getMessage(), is(equalTo("test error")));
-        assertThat(response.getErrorCode(), is(equalTo(HandlerErrorCode.InternalFailure)));
     }
 
-    @Test
+    @Test(expected = AmazonServiceException.class)
     public void test_HandleRequest_FailedCreate_AmazonServiceException() {
         final CreateHandler handler = new CreateHandler();
 
-        // throw for pre-describe and then throw arbitrary error for create
+        // AmazonServiceExceptions should be thrown so they can be handled by wrapper
         doThrow(ConfigurationSetDoesNotExistException.class)
             .doThrow(new AmazonServiceException("test error"))
             .when(proxy)
@@ -132,16 +123,7 @@ public class CreateHandlerTest {
             .desiredResourceState(model)
             .build();
 
-        final ProgressEvent response = handler.handleRequest(proxy, request, null, logger);
-
-        assertThat(response, is(not(nullValue())));
-        assertThat(response.getStatus(), is(equalTo(OperationStatus.FAILED)));
-        assertThat(response.getCallbackContext(), is(nullValue()));
-        assertThat(response.getCallbackDelaySeconds(), is(equalTo(0)));
-        assertThat(response.getResourceModel(), is(nullValue()));
-        assertThat(response.getResourceModels(), is(nullValue()));
-        assertThat(response.getMessage(), is(equalTo("test error (Service: null; Status Code: 0; Error Code: null; Request ID: null)")));
-        assertThat(response.getErrorCode(), is(equalTo(HandlerErrorCode.ServiceException)));
+        handler.handleRequest(proxy, request, null, logger);
     }
 
     @Test

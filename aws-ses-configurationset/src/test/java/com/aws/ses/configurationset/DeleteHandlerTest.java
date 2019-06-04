@@ -70,10 +70,11 @@ public class DeleteHandlerTest {
         assertThat(response.getErrorCode(), is(nullValue()));
     }
 
-    @Test
+    @Test(expected = SdkException.class)
     public void test_HandleRequest_FailedDelete_UnknownError() {
         final DeleteHandler handler = new DeleteHandler();
 
+        // all Exceptions should be thrown so they can be handled by wrapper
         doThrow(SdkException.builder().message("test error").build())
             .when(proxy)
             .injectCredentialsAndInvokeV2(
@@ -101,10 +102,11 @@ public class DeleteHandlerTest {
         assertThat(response.getErrorCode(), is(equalTo(HandlerErrorCode.InternalFailure)));
     }
 
-    @Test
+    @Test(expected = AmazonServiceException.class)
     public void test_HandleRequest_FailedDelete_AmazonServiceException() {
         final DeleteHandler handler = new DeleteHandler();
 
+        // AmazonServiceExceptions should be thrown so they can be handled by wrapper
         doThrow(new AmazonServiceException("test error"))
             .when(proxy)
             .injectCredentialsAndInvokeV2(
