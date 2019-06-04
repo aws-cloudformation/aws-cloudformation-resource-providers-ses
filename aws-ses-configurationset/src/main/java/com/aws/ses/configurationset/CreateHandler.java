@@ -1,16 +1,15 @@
 package com.aws.ses.configurationset;
 
-import com.aws.cfn.proxy.AmazonWebServicesClientProxy;
-import com.aws.cfn.proxy.HandlerErrorCode;
-import com.aws.cfn.proxy.Logger;
-import com.aws.cfn.proxy.ProgressEvent;
-import com.aws.cfn.proxy.ResourceHandlerRequest;
+import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
+import com.amazonaws.cloudformation.proxy.HandlerErrorCode;
+import com.amazonaws.cloudformation.proxy.Logger;
+import com.amazonaws.cloudformation.proxy.ProgressEvent;
+import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
 import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.ConfigurationSet;
 import software.amazon.awssdk.services.ses.model.ConfigurationSetAlreadyExistsException;
 import software.amazon.awssdk.services.ses.model.ConfigurationSetDoesNotExistException;
 import software.amazon.awssdk.services.ses.model.CreateConfigurationSetRequest;
-import software.amazon.awssdk.services.ses.model.CreateConfigurationSetResponse;
 
 public class CreateHandler extends BaseHandler<CallbackContext> {
 
@@ -70,8 +69,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                         .name(model.getName())
                         .build())
                     .build();
-            CreateConfigurationSetResponse r = proxy.injectCredentialsAndInvokeV2(createConfigurationSetRequest, this
-                                                                                        .client::createConfigurationSet);
+            proxy.injectCredentialsAndInvokeV2(createConfigurationSetRequest, this.client::createConfigurationSet);
             this.logger.log(String.format("SES Configuration Set with Name [%s] created successfully", model.getName
                                                                                                                  ()));
         } catch (final ConfigurationSetAlreadyExistsException e) {
@@ -94,7 +92,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
             .build();
         return ProgressEvent.defaultInProgressHandler(
             stabilizationContext,
-            1,
+            5,
             model);
     }
 
@@ -120,7 +118,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
 
         return ProgressEvent.defaultInProgressHandler(
             callbackContext,
-            1,
+            5,
             model);
     }
 }

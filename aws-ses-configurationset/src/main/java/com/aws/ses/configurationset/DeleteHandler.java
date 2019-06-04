@@ -1,10 +1,10 @@
 package com.aws.ses.configurationset;
 
-import com.aws.cfn.proxy.AmazonWebServicesClientProxy;
-import com.aws.cfn.proxy.HandlerErrorCode;
-import com.aws.cfn.proxy.Logger;
-import com.aws.cfn.proxy.ProgressEvent;
-import com.aws.cfn.proxy.ResourceHandlerRequest;
+import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
+import com.amazonaws.cloudformation.proxy.HandlerErrorCode;
+import com.amazonaws.cloudformation.proxy.Logger;
+import com.amazonaws.cloudformation.proxy.ProgressEvent;
+import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
 import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.ConfigurationSetDoesNotExistException;
 import software.amazon.awssdk.services.ses.model.DeleteConfigurationSetRequest;
@@ -59,7 +59,7 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
             .build();
         return ProgressEvent.defaultInProgressHandler(
             stabilizationContext,
-            1,
+            5,
             model);
     }
 
@@ -83,7 +83,7 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
 
         return ProgressEvent.defaultInProgressHandler(
             callbackContext,
-            1,
+            5,
             model);
     }
 }

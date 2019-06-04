@@ -1,11 +1,11 @@
 package com.aws.ses.configurationset;
 
-import com.aws.cfn.proxy.AmazonWebServicesClientProxy;
-import com.aws.cfn.proxy.HandlerErrorCode;
-import com.aws.cfn.proxy.Logger;
-import com.aws.cfn.proxy.OperationStatus;
-import com.aws.cfn.proxy.ProgressEvent;
-import com.aws.cfn.proxy.ResourceHandlerRequest;
+import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
+import com.amazonaws.cloudformation.proxy.HandlerErrorCode;
+import com.amazonaws.cloudformation.proxy.Logger;
+import com.amazonaws.cloudformation.proxy.OperationStatus;
+import com.amazonaws.cloudformation.proxy.ProgressEvent;
+import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -62,7 +62,7 @@ public class DeleteHandlerTest {
         assertThat(response.getStatus(), is(equalTo(OperationStatus.IN_PROGRESS)));
         assertThat(response.getCallbackContext(), is(not(nullValue())));
         assertThat(((CallbackContext)response.getCallbackContext()).getIsStabilization(), is(true));
-        assertThat(response.getCallbackDelayMinutes(), is(equalTo(1)));
+        assertThat(response.getCallbackDelaySeconds(), is(equalTo(5)));
         assertThat(response.getResourceModel(), is(equalTo(model)));
         assertThat(response.getResourceModels(), is(nullValue()));
         assertThat(response.getMessage(), is(nullValue()));
@@ -93,7 +93,7 @@ public class DeleteHandlerTest {
         assertThat(response, is(not(nullValue())));
         assertThat(response.getStatus(), is(equalTo(OperationStatus.FAILED)));
         assertThat(response.getCallbackContext(), is(nullValue()));
-        assertThat(response.getCallbackDelayMinutes(), is(equalTo(0)));
+        assertThat(response.getCallbackDelaySeconds(), is(equalTo(0)));
         assertThat(response.getResourceModel(), is(nullValue()));
         assertThat(response.getResourceModels(), is(nullValue()));
         assertThat(response.getMessage(), is(equalTo("test error")));
@@ -128,7 +128,7 @@ public class DeleteHandlerTest {
         assertThat(response, is(not(nullValue())));
         assertThat(response.getStatus(), is(equalTo(OperationStatus.SUCCESS)));
         assertThat(response.getCallbackContext(), is(nullValue()));
-        assertThat(response.getCallbackDelayMinutes(), is(equalTo(0)));
+        assertThat(response.getCallbackDelaySeconds(), is(equalTo(0)));
         assertThat(response.getResourceModel(), is(nullValue()));
         assertThat(response.getResourceModels(), is(nullValue()));
         assertThat(response.getMessage(), is(nullValue()));
@@ -159,7 +159,7 @@ public class DeleteHandlerTest {
         assertThat(response, is(not(nullValue())));
         assertThat(response.getStatus(), is(equalTo(OperationStatus.SUCCESS)));
         assertThat(response.getCallbackContext(), is(nullValue()));
-        assertThat(response.getCallbackDelayMinutes(), is(equalTo(0)));
+        assertThat(response.getCallbackDelaySeconds(), is(equalTo(0)));
         assertThat(response.getResourceModel(), is(nullValue()));
         assertThat(response.getResourceModels(), is(nullValue()));
         assertThat(response.getMessage(), is(nullValue()));
