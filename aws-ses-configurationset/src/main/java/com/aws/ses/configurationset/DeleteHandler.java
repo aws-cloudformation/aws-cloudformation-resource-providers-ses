@@ -1,5 +1,6 @@
 package com.aws.ses.configurationset;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.HandlerErrorCode;
 import com.amazonaws.cloudformation.proxy.Logger;
@@ -47,11 +48,16 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
         } catch (ConfigurationSetDoesNotExistException e) {
             logger.log(String.format("SES Configuration Set with Name [%s] is already deleted", model.getName()));
             return ProgressEvent.defaultSuccessHandler(null);
-        } catch (Exception e) {
-            this.logger.log("An error occurred deleting an SES Configuration Set: " + e.toString());
+        } catch (final AmazonServiceException e) {
+            this.logger.log("A downstream error occurred deleting SES Configuration Set: " + e.toString());
             return ProgressEvent.defaultFailureHandler(
                 e,
                 HandlerErrorCode.ServiceException);
+        } catch (final Exception e) {
+            this.logger.log("An unknown error occurred deleting an SES Configuration Set: " + e.toString());
+            return ProgressEvent.defaultFailureHandler(
+                e,
+                HandlerErrorCode.InternalFailure);
         }
 
         CallbackContext stabilizationContext = CallbackContext.builder()
@@ -74,11 +80,16 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
             new ReadHandler().handleRequest(proxy, request, null, this.logger);
         } catch (final ConfigurationSetDoesNotExistException e) {
             return ProgressEvent.defaultSuccessHandler(null);
-        } catch (final Exception e) {
-            this.logger.log("An error occurred stabilizing an SES Configuration Set: " + e.toString());
+        } catch (final AmazonServiceException e) {
+            this.logger.log("A downstream error occurred stabilizing SES Configuration Set: " + e.toString());
             return ProgressEvent.defaultFailureHandler(
                 e,
                 HandlerErrorCode.ServiceException);
+        } catch (final Exception e) {
+            this.logger.log("An unknown error occurred stabilizing an SES Configuration Set: " + e.toString());
+            return ProgressEvent.defaultFailureHandler(
+                e,
+                HandlerErrorCode.InternalFailure);
         }
 
         return ProgressEvent.defaultInProgressHandler(

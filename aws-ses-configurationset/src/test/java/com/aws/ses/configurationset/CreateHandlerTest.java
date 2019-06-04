@@ -1,5 +1,6 @@
 package com.aws.ses.configurationset;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.HandlerErrorCode;
 import com.amazonaws.cloudformation.proxy.Logger;
@@ -78,7 +79,7 @@ public class CreateHandlerTest {
     }
 
     @Test
-    public void test_HandleRequest_FailedCreate() {
+    public void test_HandleRequest_FailedCreate_UnknownError() {
         final CreateHandler handler = new CreateHandler();
 
         // throw for pre-describe and then throw arbitrary error for create
@@ -107,6 +108,39 @@ public class CreateHandlerTest {
         assertThat(response.getResourceModel(), is(nullValue()));
         assertThat(response.getResourceModels(), is(nullValue()));
         assertThat(response.getMessage(), is(equalTo("test error")));
+        assertThat(response.getErrorCode(), is(equalTo(HandlerErrorCode.InternalFailure)));
+    }
+
+    @Test
+    public void test_HandleRequest_FailedCreate_AmazonServiceException() {
+        final CreateHandler handler = new CreateHandler();
+
+        // throw for pre-describe and then throw arbitrary error for create
+        doThrow(ConfigurationSetDoesNotExistException.class)
+            .doThrow(new AmazonServiceException("test error"))
+            .when(proxy)
+            .injectCredentialsAndInvokeV2(
+                ArgumentMatchers.any(),
+                ArgumentMatchers.any()
+            );
+
+        final ResourceModel model = ResourceModel.builder()
+            .name("test-set")
+            .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+            .desiredResourceState(model)
+            .build();
+
+        final ProgressEvent response = handler.handleRequest(proxy, request, null, logger);
+
+        assertThat(response, is(not(nullValue())));
+        assertThat(response.getStatus(), is(equalTo(OperationStatus.FAILED)));
+        assertThat(response.getCallbackContext(), is(nullValue()));
+        assertThat(response.getCallbackDelaySeconds(), is(equalTo(0)));
+        assertThat(response.getResourceModel(), is(nullValue()));
+        assertThat(response.getResourceModels(), is(nullValue()));
+        assertThat(response.getMessage(), is(equalTo("test error (Service: null; Status Code: 0; Error Code: null; Request ID: null)")));
         assertThat(response.getErrorCode(), is(equalTo(HandlerErrorCode.ServiceException)));
     }
 

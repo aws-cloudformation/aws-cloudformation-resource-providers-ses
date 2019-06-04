@@ -1,5 +1,6 @@
 package com.aws.ses.configurationset;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.HandlerErrorCode;
 import com.amazonaws.cloudformation.proxy.Logger;
@@ -55,11 +56,16 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
             }
         } catch (final ConfigurationSetDoesNotExistException e) {
             // no existing resource, creation can proceed
-        } catch (final Exception e) {
-            this.logger.log("Pre-Create Read Failure " + e.toString());
+        } catch (final AmazonServiceException e) {
+            this.logger.log("A downstream error occurred describing SES Configuration Set: " + e.toString());
             return ProgressEvent.defaultFailureHandler(
                 e,
                 HandlerErrorCode.ServiceException);
+        } catch (final Exception e) {
+            this.logger.log("An unknown error occurred describing an SES Configuration Set: " + e.toString());
+            return ProgressEvent.defaultFailureHandler(
+                e,
+                HandlerErrorCode.InternalFailure);
         }
 
         try {
@@ -80,11 +86,16 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                     .message("Resource already exits.")
                     .build(),
                 HandlerErrorCode.AlreadyExists);
-        } catch (final Exception e) {
-            this.logger.log("An error occurred creating an SES Configuration Set: " + e.toString());
+        } catch (final AmazonServiceException e) {
+            this.logger.log("A downstream error occurred creating an SES Configuration Set: " + e.toString());
             return ProgressEvent.defaultFailureHandler(
                 e,
                 HandlerErrorCode.ServiceException);
+        } catch (final Exception e) {
+            this.logger.log("An unknown error occurred creating an SES Configuration Set: " + e.toString());
+            return ProgressEvent.defaultFailureHandler(
+                e,
+                HandlerErrorCode.InternalFailure);
         }
 
         CallbackContext stabilizationContext = CallbackContext.builder()
@@ -109,11 +120,16 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
             return ProgressEvent.defaultSuccessHandler(readResult.getResourceModel());
         } catch (final ConfigurationSetDoesNotExistException e) {
             // resource not yet found, re-invoke
-        } catch (final Exception e) {
-            this.logger.log("An error occurred stabilizing an SES Configuration Set: " + e.toString());
+        } catch (final AmazonServiceException e) {
+            this.logger.log("A downstream error occurred stabilizing an SES Configuration Set: " + e.toString());
             return ProgressEvent.defaultFailureHandler(
                 e,
                 HandlerErrorCode.ServiceException);
+        } catch (final Exception e) {
+            this.logger.log("An unknown error occurred stabilizing an SES Configuration Set: " + e.toString());
+            return ProgressEvent.defaultFailureHandler(
+                e,
+                HandlerErrorCode.InternalFailure);
         }
 
         return ProgressEvent.defaultInProgressHandler(
