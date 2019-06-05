@@ -1,6 +1,5 @@
 package com.aws.ses.configurationset;
 
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.HandlerErrorCode;
 import com.amazonaws.cloudformation.proxy.Logger;
@@ -43,11 +42,13 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         final AmazonWebServicesClientProxy proxy,
         final ResourceHandlerRequest<ResourceModel> request) {
 
+        ResourceModel model = request.getDesiredResourceState();
+
         // resource can auto-generate a name if not supplied by caller
         // this logic should move up into the CloudFormation engine, but
         // currently exists here for backwards-compatibility with existing models
-        if (StringUtils.isNullOrEmpty(request.getDesiredResourceState().getName())) {
-            request.getDesiredResourceState().setName(
+        if (StringUtils.isNullOrEmpty(model.getName())) {
+            model.setName(
                 IdentifierUtils.generateResourceIdentifier(
                     request.getLogicalResourceIdentifier(),
                     request.getClientRequestToken(),
@@ -55,8 +56,6 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                 )
             );
         }
-
-        ResourceModel model = request.getDesiredResourceState();
 
         // pre-creation read to ensure no existing resource exists
         try {
