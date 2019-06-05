@@ -41,7 +41,7 @@ public class UpdateHandlerTest {
             .desiredResourceState(model)
             .build();
 
-        final ProgressEvent response = handler.handleRequest(proxy, request, null, logger);
+        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, null, logger);
 
         assertThat(response, is(not(nullValue())));
         assertThat(response.getStatus(), is(equalTo(OperationStatus.FAILED)));
