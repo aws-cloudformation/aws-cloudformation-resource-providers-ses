@@ -19,7 +19,7 @@
         ]
     ],
     "required": [
-        "/properties/Name"
+        "Name"
     ],
     "additionalProperties": false
 }

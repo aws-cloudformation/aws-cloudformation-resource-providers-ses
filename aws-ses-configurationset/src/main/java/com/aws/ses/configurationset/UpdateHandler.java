@@ -1,10 +1,11 @@
 package com.aws.ses.configurationset;
 
-import com.aws.cfn.proxy.AmazonWebServicesClientProxy;
-import com.aws.cfn.proxy.Logger;
-import com.aws.cfn.proxy.ProgressEvent;
-import com.aws.cfn.proxy.OperationStatus;
-import com.aws.cfn.proxy.ResourceHandlerRequest;
+import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
+import com.amazonaws.cloudformation.proxy.HandlerErrorCode;
+import com.amazonaws.cloudformation.proxy.Logger;
+import com.amazonaws.cloudformation.proxy.ProgressEvent;
+import com.amazonaws.cloudformation.proxy.OperationStatus;
+import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
 
 public class UpdateHandler extends BaseHandler<CallbackContext> {
 
@@ -14,14 +15,9 @@ public class UpdateHandler extends BaseHandler<CallbackContext> {
         final ResourceHandlerRequest<ResourceModel> request,
         final CallbackContext callbackContext,
         final Logger logger) {
-
-        final ResourceModel model = request.getDesiredResourceState();
-
-        // TODO : put your code here
-
         return ProgressEvent.<ResourceModel, CallbackContext>builder()
-            .resourceModel(model)
-            .status(OperationStatus.SUCCESS)
+            .errorCode(HandlerErrorCode.NotUpdatable)
+            .status(OperationStatus.FAILED)
             .build();
     }
 }
