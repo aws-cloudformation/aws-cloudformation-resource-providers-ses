@@ -1,6 +1,6 @@
-## CloudFormation Resource Provider Package For Simple Email Service
+## CloudFormation Resource Provider Package For Amazon Simple Email Service
 
-The CloudFormation Resource Provider Package For Simple Email Service
+The CloudFormation Resource Provider Package For Amazon Simple Email Service
 
 ## License
 
