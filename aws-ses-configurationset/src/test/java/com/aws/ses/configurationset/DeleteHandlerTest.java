@@ -2,30 +2,29 @@ package com.aws.ses.configurationset;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
-import com.amazonaws.cloudformation.proxy.HandlerErrorCode;
 import com.amazonaws.cloudformation.proxy.Logger;
 import com.amazonaws.cloudformation.proxy.OperationStatus;
 import com.amazonaws.cloudformation.proxy.ProgressEvent;
 import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.services.ses.model.ConfigurationSet;
 import software.amazon.awssdk.services.ses.model.ConfigurationSetDoesNotExistException;
 import software.amazon.awssdk.services.ses.model.DeleteConfigurationSetResponse;
 import software.amazon.awssdk.services.ses.model.DescribeConfigurationSetResponse;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNot.not;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
+@ExtendWith(MockitoExtension.class)
 public class DeleteHandlerTest {
 
     @Mock
@@ -34,14 +33,14 @@ public class DeleteHandlerTest {
     @Mock
     private Logger logger;
 
-    @Before
+    @BeforeEach
     public void setup() {
         proxy = mock(AmazonWebServicesClientProxy.class);
         logger = mock(Logger.class);
     }
 
     @Test
-    public void test_HandleRequest_SimpleSuccess() {
+    public void handleRequest_SimpleSuccess() {
         final DeleteHandler handler = new DeleteHandler();
 
         doReturn(DeleteConfigurationSetResponse.builder().build())
@@ -61,19 +60,19 @@ public class DeleteHandlerTest {
 
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, null, logger);
 
-        assertThat(response, is(not(nullValue())));
-        assertThat(response.getStatus(), is(equalTo(OperationStatus.IN_PROGRESS)));
-        assertThat(response.getCallbackContext(), is(not(nullValue())));
-        assertThat(response.getCallbackContext().getIsStabilization(), is(true));
-        assertThat(response.getCallbackDelaySeconds(), is(equalTo(5)));
-        assertThat(response.getResourceModel(), is(equalTo(model)));
-        assertThat(response.getResourceModels(), is(nullValue()));
-        assertThat(response.getMessage(), is(nullValue()));
-        assertThat(response.getErrorCode(), is(nullValue()));
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.IN_PROGRESS);
+        assertThat(response.getCallbackContext()).isNotNull();
+        assertThat(response.getCallbackContext().getIsStabilization()).isTrue();
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(5);
+        assertThat(response.getResourceModel()).isEqualTo(model);
+        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getMessage()).isNull();
+        assertThat(response.getErrorCode()).isNull();
     }
 
-    @Test(expected = SdkException.class)
-    public void test_HandleRequest_FailedDelete_UnknownError() {
+    @Test
+    public void handleRequest_FailedDelete_UnknownError() {
         final DeleteHandler handler = new DeleteHandler();
 
         // all Exceptions should be thrown so they can be handled by wrapper
@@ -92,20 +91,13 @@ public class DeleteHandlerTest {
             .desiredResourceState(model)
             .build();
 
-        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, null, logger);
-
-        assertThat(response, is(not(nullValue())));
-        assertThat(response.getStatus(), is(equalTo(OperationStatus.FAILED)));
-        assertThat(response.getCallbackContext(), is(nullValue()));
-        assertThat(response.getCallbackDelaySeconds(), is(equalTo(0)));
-        assertThat(response.getResourceModel(), is(nullValue()));
-        assertThat(response.getResourceModels(), is(nullValue()));
-        assertThat(response.getMessage(), is(equalTo("test error")));
-        assertThat(response.getErrorCode(), is(equalTo(HandlerErrorCode.InternalFailure)));
+        assertThrows(SdkException.class, () -> {
+            handler.handleRequest(proxy, request, null, logger);
+        });
     }
 
-    @Test(expected = AmazonServiceException.class)
-    public void test_HandleRequest_FailedDelete_AmazonServiceException() {
+    @Test
+    public void handleRequest_FailedDelete_AmazonServiceException() {
         final DeleteHandler handler = new DeleteHandler();
 
         // AmazonServiceExceptions should be thrown so they can be handled by wrapper
@@ -124,20 +116,13 @@ public class DeleteHandlerTest {
             .desiredResourceState(model)
             .build();
 
-        final ProgressEvent response = handler.handleRequest(proxy, request, null, logger);
-
-        assertThat(response, is(not(nullValue())));
-        assertThat(response.getStatus(), is(equalTo(OperationStatus.FAILED)));
-        assertThat(response.getCallbackContext(), is(nullValue()));
-        assertThat(response.getCallbackDelaySeconds(), is(equalTo(0)));
-        assertThat(response.getResourceModel(), is(nullValue()));
-        assertThat(response.getResourceModels(), is(nullValue()));
-        assertThat(response.getMessage(), is(equalTo("test error (Service: null; Status Code: 0; Error Code: null; Request ID: null)")));
-        assertThat(response.getErrorCode(), is(equalTo(HandlerErrorCode.ServiceException)));
+        assertThrows(AmazonServiceException.class, () -> {
+            handler.handleRequest(proxy, request, null, logger);
+        });
     }
 
     @Test
-    public void test_HandleRequest_Stabilize() {
+    public void handleRequest_Stabilize() {
         final DeleteHandler handler = new DeleteHandler();
 
         final CallbackContext callbackContext = CallbackContext.builder()
@@ -161,18 +146,18 @@ public class DeleteHandlerTest {
 
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, callbackContext, logger);
 
-        assertThat(response, is(not(nullValue())));
-        assertThat(response.getStatus(), is(equalTo(OperationStatus.SUCCESS)));
-        assertThat(response.getCallbackContext(), is(nullValue()));
-        assertThat(response.getCallbackDelaySeconds(), is(equalTo(0)));
-        assertThat(response.getResourceModel(), is(nullValue()));
-        assertThat(response.getResourceModels(), is(nullValue()));
-        assertThat(response.getMessage(), is(nullValue()));
-        assertThat(response.getErrorCode(), is(nullValue()));
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackContext()).isNull();
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+        assertThat(response.getResourceModel()).isNull();
+        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getMessage()).isNull();
+        assertThat(response.getErrorCode()).isNull();
     }
 
     @Test
-    public void test_HandleRequest_StabilizeAgain() {
+    public void handleRequest_StabilizeAgain() {
         final DeleteHandler handler = new DeleteHandler();
 
         final CallbackContext callbackContext = CallbackContext.builder()
@@ -202,18 +187,18 @@ public class DeleteHandlerTest {
 
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, callbackContext, logger);
 
-        assertThat(response, is(not(nullValue())));
-        assertThat(response.getStatus(), is(equalTo(OperationStatus.IN_PROGRESS)));
-        assertThat(response.getCallbackContext(), is(equalTo(callbackContext)));
-        assertThat(response.getCallbackDelaySeconds(), is(equalTo(5)));
-        assertThat(response.getResourceModel(), is(equalTo(model)));
-        assertThat(response.getResourceModels(), is(nullValue()));
-        assertThat(response.getMessage(), is(nullValue()));
-        assertThat(response.getErrorCode(), is(nullValue()));
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.IN_PROGRESS);
+        assertThat(response.getCallbackContext()).isEqualTo(callbackContext);
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(5);
+        assertThat(response.getResourceModel()).isEqualTo(model);
+        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getMessage()).isNull();
+        assertThat(response.getErrorCode()).isNull();
     }
 
     @Test
-    public void test_HandleRequest_NonExistingSuccess() {
+    public void handleRequest_NonExistingSuccess() {
         final DeleteHandler handler = new DeleteHandler();
 
         doThrow(ConfigurationSetDoesNotExistException.class)
@@ -233,13 +218,13 @@ public class DeleteHandlerTest {
 
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, null, logger);
 
-        assertThat(response, is(not(nullValue())));
-        assertThat(response.getStatus(), is(equalTo(OperationStatus.SUCCESS)));
-        assertThat(response.getCallbackContext(), is(nullValue()));
-        assertThat(response.getCallbackDelaySeconds(), is(equalTo(0)));
-        assertThat(response.getResourceModel(), is(nullValue()));
-        assertThat(response.getResourceModels(), is(nullValue()));
-        assertThat(response.getMessage(), is(nullValue()));
-        assertThat(response.getErrorCode(), is(nullValue()));
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackContext()).isNull();
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+        assertThat(response.getResourceModel()).isNull();
+        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getMessage()).isNull();
+        assertThat(response.getErrorCode()).isNull();
     }
 }
