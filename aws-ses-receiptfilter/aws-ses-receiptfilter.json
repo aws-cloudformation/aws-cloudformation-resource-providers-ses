@@ -1,0 +1,104 @@
+{
+    "typeName": "AWS::SES::ReceiptFilter",
+    "description": "An example resource schema demonstrating some basic constructs and validation rules.",
+    "sourceUrl": "git@github.com:aws-cloudformation/aws-cloudformation-rpdk.git",
+    "definitions": {
+        "InitechDateFormat": {
+            "$comment": "Use the `definitions` block to provide shared resource property schemas",
+            "type": "string",
+            "format": "date-time"
+        }
+    },
+    "properties": {
+        "TPSCode": {
+            "description": "A TPS Code is automatically generated on creation and assigned as the unique identifier.",
+            "type": "string",
+            "pattern": "^[A-Z]{3,5}[0-9]{8}-[0-9]{4}$"
+        },
+        "Title": {
+            "description": "The title of the TPS report is a mandatory element.",
+            "type": "string",
+            "minLength": 20,
+            "maxLength": 250
+        },
+        "CoverSheetIncluded": {
+            "description": "Required for all TPS Reports submitted after 2/19/1999",
+            "type": "boolean"
+        },
+        "DueDate": {
+            "$ref": "#/definitions/InitechDateFormat"
+        },
+        "ApprovalDate": {
+            "$ref": "#/definitions/InitechDateFormat"
+        },
+        "Memo": {
+            "type": "string"
+        },
+        "SecondCopyOfMemo": {
+            "description": "In case you didn't get the first one.",
+            "type": "string"
+        },
+        "TestCode": {
+            "type": "string",
+            "enum": [
+                "NOT_STARTED",
+                "CANCELLED"
+            ]
+        },
+        "Authors": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        }
+    },
+    "required": [
+        "Title",
+        "DueDate"
+    ],
+    "readOnlyProperties": [
+        "/properties/tps_code"
+    ],
+    "identifiers": [
+        [
+            "/properties/tps_code"
+        ]
+    ],
+    "handlers": {
+        "create": {
+            "protocolVersion": "1.0",
+            "runtimeType": "Lambda",
+            "permissions": [
+                "initech:CreateReport"
+            ]
+        },
+        "read": {
+            "protocolVersion": "1.0",
+            "runtimeType": "Lambda",
+            "permissions": [
+                "initech:DescribeReport"
+            ]
+        },
+        "update": {
+            "protocolVersion": "1.0",
+            "runtimeType": "Lambda",
+            "permissions": [
+                "initech:UpdateReport"
+            ]
+        },
+        "delete": {
+            "protocolVersion": "1.0",
+            "runtimeType": "Lambda",
+            "permissions": [
+                "initech:DeleteReport"
+            ]
+        },
+        "list": {
+            "protocolVersion": "1.0",
+            "runtimeType": "Lambda",
+            "permissions": [
+                "initech:ListReports"
+            ]
+        }
+    }
+}
