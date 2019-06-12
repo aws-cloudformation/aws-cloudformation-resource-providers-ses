@@ -1,11 +1,13 @@
 package com.aws.ses.configurationset;
 
+import com.amazonaws.cloudformation.exceptions.ResourceNotFoundException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.Logger;
 import com.amazonaws.cloudformation.proxy.OperationStatus;
 import com.amazonaws.cloudformation.proxy.ProgressEvent;
 import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
 import software.amazon.awssdk.services.ses.SesClient;
+import software.amazon.awssdk.services.ses.model.ConfigurationSetDoesNotExistException;
 import software.amazon.awssdk.services.ses.model.DescribeConfigurationSetRequest;
 import software.amazon.awssdk.services.ses.model.DescribeConfigurationSetResponse;
 
@@ -37,8 +39,12 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
             .configurationSetName(configurationSetName)
             .build();
 
-        DescribeConfigurationSetResponse response =
-            this.proxy.injectCredentialsAndInvokeV2(request, this.client::describeConfigurationSet);
+        final DescribeConfigurationSetResponse response;
+        try {
+            response = this.proxy.injectCredentialsAndInvokeV2(request, this.client::describeConfigurationSet);
+        } catch (final ConfigurationSetDoesNotExistException e) {
+            throw new ResourceNotFoundException(ResourceModel.TYPE_NAME, configurationSetName);
+        }
 
         return ResourceModel.builder()
             .name(response.configurationSet().name())

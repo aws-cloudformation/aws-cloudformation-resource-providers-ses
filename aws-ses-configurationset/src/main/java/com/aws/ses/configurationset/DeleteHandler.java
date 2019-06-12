@@ -1,14 +1,15 @@
 package com.aws.ses.configurationset;
 
-import com.amazonaws.AmazonServiceException;
+import com.amazonaws.cloudformation.exceptions.ResourceNotFoundException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
-import com.amazonaws.cloudformation.proxy.HandlerErrorCode;
 import com.amazonaws.cloudformation.proxy.Logger;
 import com.amazonaws.cloudformation.proxy.ProgressEvent;
 import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
 import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.ConfigurationSetDoesNotExistException;
 import software.amazon.awssdk.services.ses.model.DeleteConfigurationSetRequest;
+
+import static com.aws.ses.configurationset.ResourceModelExtensions.getPrimaryIdentifier;
 
 public class DeleteHandler extends BaseHandler<CallbackContext> {
 
@@ -44,9 +45,11 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
                 .configurationSetName(model.getName())
                 .build();
             proxy.injectCredentialsAndInvokeV2(deleteConfigurationSetRequest, this.client::deleteConfigurationSet);
-            logger.log(String.format("SES Configuration Set with Name [%s] deleted successfully", model.getName()));
-        } catch (ConfigurationSetDoesNotExistException e) {
-            logger.log(String.format("SES Configuration Set with Name [%s] is already deleted", model.getName()));
+            logger.log(String.format("%s [%s] deleted successfully",
+                ResourceModel.TYPE_NAME, getPrimaryIdentifier(model).toString()));
+        } catch (final ConfigurationSetDoesNotExistException e) {
+            logger.log(String.format("%s [%s] is already deleted",
+                ResourceModel.TYPE_NAME, getPrimaryIdentifier(model).toString()));
             return ProgressEvent.defaultSuccessHandler(null);
         }
 
@@ -68,7 +71,7 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
         // read to ensure resource no longer exists
         try {
             new ReadHandler().handleRequest(proxy, request, null, this.logger);
-        } catch (final ConfigurationSetDoesNotExistException e) {
+        } catch (final ResourceNotFoundException e) {
             return ProgressEvent.defaultSuccessHandler(null);
         }
 

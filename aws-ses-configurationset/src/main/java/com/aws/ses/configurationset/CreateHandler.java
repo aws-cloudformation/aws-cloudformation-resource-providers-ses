@@ -1,7 +1,8 @@
 package com.aws.ses.configurationset;
 
+import com.amazonaws.cloudformation.exceptions.ResourceAlreadyExistsException;
+import com.amazonaws.cloudformation.exceptions.ResourceNotFoundException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
-import com.amazonaws.cloudformation.proxy.HandlerErrorCode;
 import com.amazonaws.cloudformation.proxy.Logger;
 import com.amazonaws.cloudformation.proxy.ProgressEvent;
 import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
@@ -12,6 +13,8 @@ import software.amazon.awssdk.services.ses.model.ConfigurationSet;
 import software.amazon.awssdk.services.ses.model.ConfigurationSetAlreadyExistsException;
 import software.amazon.awssdk.services.ses.model.ConfigurationSetDoesNotExistException;
 import software.amazon.awssdk.services.ses.model.CreateConfigurationSetRequest;
+
+import static com.aws.ses.configurationset.ResourceModelExtensions.getPrimaryIdentifier;
 
 public class CreateHandler extends BaseHandler<CallbackContext> {
 
@@ -59,19 +62,9 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
 
         // pre-creation read to ensure no existing resource exists
         try {
-            final ProgressEvent<ResourceModel, CallbackContext> readResult =
-                new ReadHandler().handleRequest(proxy, request, null, this.logger);
-            if (readResult.getResourceModel() != null &&
-                readResult.getResourceModel().getName().equals(model.getName())) {
-
-                this.logger.log(String.format("SES Configuration Set with Name [%s] already exists", model.getName()));
-                return ProgressEvent.defaultFailureHandler(
-                    ConfigurationSetAlreadyExistsException.builder()
-                        .message("Resource already exits.")
-                        .build(),
-                    HandlerErrorCode.AlreadyExists);
-            }
-        } catch (final ConfigurationSetDoesNotExistException e) {
+            new ReadHandler().handleRequest(proxy, request, null, this.logger);
+            throw new ResourceAlreadyExistsException(ResourceModel.TYPE_NAME, model.getName());
+        } catch (final ResourceNotFoundException e) {
             // no existing resource, creation can proceed
         }
 
@@ -83,16 +76,11 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                         .build())
                     .build();
             proxy.injectCredentialsAndInvokeV2(createConfigurationSetRequest, this.client::createConfigurationSet);
-            this.logger.log(String.format("SES Configuration Set with Name [%s] created successfully", model.getName
-                                                                                                                 ()));
+            logger.log(String.format("%s [%s] created successfully",
+                ResourceModel.TYPE_NAME, getPrimaryIdentifier(model).toString()));
         } catch (final ConfigurationSetAlreadyExistsException e) {
-            this.logger.log(String.format("SES Configuration Set with Name [%s] was already created", model.getName()));
-            return ProgressEvent.defaultFailureHandler(
-                // failing here would suggest a conflicting operation was performed out of band
-                ConfigurationSetAlreadyExistsException.builder()
-                    .message("Resource already exits.")
-                    .build(),
-                HandlerErrorCode.AlreadyExists);
+            // failing here would suggest a conflicting operation was performed out of band
+            throw new ResourceAlreadyExistsException(ResourceModel.TYPE_NAME, model.getName());
         }
 
         CallbackContext stabilizationContext = CallbackContext.builder()

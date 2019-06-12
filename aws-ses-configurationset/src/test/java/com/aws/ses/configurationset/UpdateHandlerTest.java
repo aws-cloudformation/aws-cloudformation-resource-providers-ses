@@ -6,17 +6,16 @@ import com.amazonaws.cloudformation.proxy.Logger;
 import com.amazonaws.cloudformation.proxy.OperationStatus;
 import com.amazonaws.cloudformation.proxy.ProgressEvent;
 import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNot.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
+@ExtendWith(MockitoExtension.class)
 public class UpdateHandlerTest {
 
     @Mock
@@ -25,14 +24,14 @@ public class UpdateHandlerTest {
     @Mock
     private Logger logger;
 
-    @Before
+    @BeforeEach
     public void setup() {
         proxy = mock(AmazonWebServicesClientProxy.class);
         logger = mock(Logger.class);
     }
 
     @Test
-    public void test_HandleRequest_NotUpdatable() {
+    public void handleRequest_NotUpdatable() {
         final UpdateHandler handler = new UpdateHandler();
 
         final ResourceModel model = ResourceModel.builder().build();
@@ -43,13 +42,13 @@ public class UpdateHandlerTest {
 
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, null, logger);
 
-        assertThat(response, is(not(nullValue())));
-        assertThat(response.getStatus(), is(equalTo(OperationStatus.FAILED)));
-        assertThat(response.getCallbackContext(), is(nullValue()));
-        assertThat(response.getCallbackDelaySeconds(), is(equalTo(0)));
-        assertThat(response.getResourceModel(), is(nullValue()));
-        assertThat(response.getResourceModels(), is(nullValue()));
-        assertThat(response.getMessage(), is(nullValue()));
-        assertThat(response.getErrorCode(), is(equalTo(HandlerErrorCode.NotUpdatable)));
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.FAILED);
+        assertThat(response.getCallbackContext()).isNull();
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+        assertThat(response.getResourceModel()).isNull();
+        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getMessage()).isNull();
+        assertThat(response.getErrorCode()).isEqualTo(HandlerErrorCode.NotUpdatable);
     }
 }
