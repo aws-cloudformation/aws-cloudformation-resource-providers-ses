@@ -26,7 +26,7 @@ public class ListHandler extends BaseHandler<CallbackContext> {
         this.proxy = proxy;
         this.client = ClientBuilder.getClient();
 
-        final List<ResourceModel> models = listConfigurationSets(request.getNextToken());
+        final List<ResourceModel> models = listConfigurationSets();
 
         return ProgressEvent.<ResourceModel, CallbackContext>builder()
             .resourceModels(models)
@@ -34,10 +34,9 @@ public class ListHandler extends BaseHandler<CallbackContext> {
             .build();
     }
 
-    private List<ResourceModel> listConfigurationSets(final String nextToken) {
+    private List<ResourceModel> listConfigurationSets() {
         final ListConfigurationSetsRequest request = ListConfigurationSetsRequest.builder()
             .maxItems(50)
-            .nextToken(nextToken)
             .build();
 
         ListConfigurationSetsResponse response =

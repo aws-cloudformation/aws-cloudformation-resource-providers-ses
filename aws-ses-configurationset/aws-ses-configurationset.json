@@ -13,10 +13,8 @@
     "createOnlyProperties": [
         "/properties/Name"
     ],
-    "identifiers": [
-        [
-            "/properties/Name"
-        ]
+    "primaryIdentifier": [
+        "/properties/Name"
     ],
     "additionalProperties": false
 }
