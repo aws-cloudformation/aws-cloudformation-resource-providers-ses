@@ -98,7 +98,7 @@ Resources:
             GitCloneDepth: 1
             SourceIdentifier: JAVA_PLUGIN
           - Type: S3
-            Location: !Sub "${CFNSDKBucket}/jar/"
+            Location: !Ref CFNSDKBucket
             SourceIdentifier: SDK
       ServiceRole: !GetAtt AWSCloudFormationResourceProviderCIRole.Arn
       Triggers:
