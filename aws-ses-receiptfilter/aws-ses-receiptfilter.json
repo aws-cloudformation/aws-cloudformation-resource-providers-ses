@@ -1,92 +1,59 @@
 {
     "typeName": "AWS::SES::ReceiptFilter",
-    "description": "An example resource schema demonstrating some basic constructs and validation rules.",
-    "sourceUrl": "git@github.com:aws-cloudformation/aws-cloudformation-rpdk.git",
+    "description": "Resource schema for AWS::SES::ReceiptFilter.",
+    "sourceUrl": "git@github.com:aws-cloudformation/aws-cloudformation-resource-providers-ses.git",
     "definitions": {
-        "InitechDateFormat": {
-            "$comment": "Use the `definitions` block to provide shared resource property schemas",
+        "IpFilter": {
+            "description": "A structure that provides the IP addresses to block or allow",
+            "type": "object",
+            "properties": {
+                "Cidr": {
+                    "description": "A single IP address or a range of IP addresses that you want to block or allow",
+                    "type": "string",
+                    "pattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(3[0-2]|[1-2][0-9]|[0-9]))$"
+                },
+                "Policy": {
+                    "description": "Indicates whether to block or allow incoming mail from the specified IP addresses",
+                    "type": "string",
+                    "enum": [
+                        "Block",
+                        "Allow"
+                    ]
+                }
+            },
+            "required": [
+                "Cidr",
+                "Policy"
+            ]
+        },
+        "IpFilterName": {
+            "description": "The name of the IP address filter.",
             "type": "string",
-            "format": "date-time"
+            "pattern": "^[a-zA-Z0-9_-]{0,64}$",
+            "maxLength": 64
         }
     },
     "properties": {
-        "TPSCode": {
-            "description": "A TPS Code is automatically generated on creation and assigned as the unique identifier.",
-            "type": "string",
-            "pattern": "^[A-Z]{3,5}[0-9]{8}-[0-9]{4}$"
-        },
-        "Title": {
-            "description": "The title of the TPS report is a mandatory element.",
-            "type": "string",
-            "minLength": 20,
-            "maxLength": 250
-        },
-        "CoverSheetIncluded": {
-            "description": "Required for all TPS Reports submitted after 2/19/1999",
-            "type": "boolean"
-        },
-        "DueDate": {
-            "$ref": "#/definitions/InitechDateFormat"
-        },
-        "ApprovalDate": {
-            "$ref": "#/definitions/InitechDateFormat"
-        },
-        "Memo": {
-            "type": "string"
-        },
-        "SecondCopyOfMemo": {
-            "description": "In case you didn't get the first one.",
-            "type": "string"
-        },
-        "TestCode": {
-            "type": "string",
-            "enum": [
-                "NOT_STARTED",
-                "CANCELLED"
+        "Filter": {
+            "type": "object",
+            "properties": {
+                "IpFilter": {
+                    "$ref": "#/definitions/IpFilter"
+                },
+                "Name": {
+                    "$ref": "#/definitions/IpFilterName"
+                }
+            },
+            "required": [
+                "IpFilter"
             ]
-        },
-        "Authors": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
         }
     },
-    "required": [
-        "Title",
-        "DueDate"
-    ],
-    "readOnlyProperties": [
-        "/properties/TPSCode"
+    "createOnlyProperties": [
+        "/properties/Filter"
     ],
     "primaryIdentifier": [
-        "/properties/TPSCode"
+        "/properties/Filter"
     ],
-    "handlers": {
-        "create": {
-            "permissions": [
-                "initech:CreateReport"
-            ]
-        },
-        "read": {
-            "permissions": [
-                "initech:DescribeReport"
-            ]
-        },
-        "update": {
-            "permissions": [
-                "initech:UpdateReport"
-            ]
-        },
-        "delete": {
-            "permissions": [
-                "initech:DeleteReport"
-            ]
-        },
-        "list": {
-            "permissions": [
-                "initech:ListReports"
-            ]
-        }
-    }
+    "additionalProperties": false
 }
