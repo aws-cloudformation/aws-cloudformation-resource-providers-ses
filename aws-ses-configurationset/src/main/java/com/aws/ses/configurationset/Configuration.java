@@ -1,6 +1,8 @@
 package com.aws.ses.configurationset;
 
 import java.io.InputStream;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 class Configuration extends BaseConfiguration {
 
@@ -8,8 +10,8 @@ class Configuration extends BaseConfiguration {
         super("aws-ses-configurationset.json");
     }
 
-    public InputStream resourceSchema() {
-        return this.getClass().getClassLoader().getResourceAsStream(schemaFilename);
+    public JSONObject resourceSchemaJSONObject() {
+        return new JSONObject(new JSONTokener(this.getClass().getClassLoader().getResourceAsStream(schemaFilename)));
     }
 
 }
