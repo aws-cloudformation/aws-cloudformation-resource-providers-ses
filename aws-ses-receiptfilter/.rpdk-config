@@ -2,6 +2,13 @@
     "typeName": "AWS::SES::ReceiptFilter",
     "language": "java",
     "runtime": "java8",
-    "entrypoint": "com.aws.ses.receiptfilter.HandlerWrapper::handleRequest",
-    "settings": {}
+    "entrypoint": "com.amazonaws.ses.receiptfilter.HandlerWrapper::handleRequest",
+    "settings": {
+        "namespace": [
+            "com",
+            "amazonaws",
+            "ses",
+            "receiptfilter"
+        ]
+    }
 }

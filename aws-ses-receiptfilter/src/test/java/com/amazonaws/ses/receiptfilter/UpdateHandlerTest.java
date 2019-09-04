@@ -1,4 +1,4 @@
-package com.aws.ses.receiptfilter;
+package com.amazonaws.ses.receiptfilter;
 
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.Logger;
@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
-public class ReadHandlerTest {
+public class UpdateHandlerTest {
 
     @Mock
     private AmazonWebServicesClientProxy proxy;
@@ -31,7 +31,7 @@ public class ReadHandlerTest {
 
     @Test
     public void handleRequest_SimpleSuccess() {
-        final ReadHandler handler = new ReadHandler();
+        final UpdateHandler handler = new UpdateHandler();
 
         final ResourceModel model = ResourceModel.builder().build();
 

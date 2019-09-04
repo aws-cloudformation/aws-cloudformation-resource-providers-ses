@@ -1,4 +1,4 @@
-package com.aws.ses.receiptfilter;
+package com.amazonaws.ses.receiptfilter;
 
 import lombok.Builder;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.aws.ses.receiptfilter;
+package com.amazonaws.ses.receiptfilter;
 
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.Logger;
@@ -6,7 +6,10 @@ import com.amazonaws.cloudformation.proxy.ProgressEvent;
 import com.amazonaws.cloudformation.proxy.OperationStatus;
 import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
 
-public class UpdateHandler extends BaseHandler<CallbackContext> {
+import java.util.ArrayList;
+import java.util.List;
+
+public class ListHandler extends BaseHandler<CallbackContext> {
 
     @Override
     public ProgressEvent<ResourceModel, CallbackContext> handleRequest(
@@ -15,12 +18,12 @@ public class UpdateHandler extends BaseHandler<CallbackContext> {
         final CallbackContext callbackContext,
         final Logger logger) {
 
-        final ResourceModel model = request.getDesiredResourceState();
+        final List<ResourceModel> models = new ArrayList<>();
 
         // TODO : put your code here
 
         return ProgressEvent.<ResourceModel, CallbackContext>builder()
-            .resourceModel(model)
+            .resourceModels(models)
             .status(OperationStatus.SUCCESS)
             .build();
     }
