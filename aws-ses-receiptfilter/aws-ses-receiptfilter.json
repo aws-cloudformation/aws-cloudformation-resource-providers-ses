@@ -1,92 +1,63 @@
 {
     "typeName": "AWS::SES::ReceiptFilter",
-    "description": "An example resource schema demonstrating some basic constructs and validation rules.",
-    "sourceUrl": "git@github.com:aws-cloudformation/aws-cloudformation-rpdk.git",
-    "definitions": {
-        "InitechDateFormat": {
-            "$comment": "Use the `definitions` block to provide shared resource property schemas",
-            "type": "string",
-            "format": "date-time"
+    "description": "Specify a new IP address filter. You use IP address filters when you receive email with Amazon SES. For more information, see the Amazon SES Developer Guide.",
+    "sourceUrl": "git@github.com:aws-cloudformation/aws-cloudformation-resource-providers-ses.git",
+    "properties": {
+        "Filter": {
+            "description": "A data structure that describes the IP address filter that you want to specify. This structure consists of a name, an IP address range, and whether to allow or block mail from it.",
+            "type": "object",
+            "properties": {
+                "IpFilter": {
+                    "$ref": "#/definitions/IpFilter"
+                },
+                "Name": {
+                    "$ref": "#/definitions/IpFilterName"
+                }
+            },
+            "required": [
+                "IpFilter"
+            ]
         }
     },
-    "properties": {
-        "TPSCode": {
-            "description": "A TPS Code is automatically generated on creation and assigned as the unique identifier.",
-            "type": "string",
-            "pattern": "^[A-Z]{3,5}[0-9]{8}-[0-9]{4}$"
-        },
-        "Title": {
-            "description": "The title of the TPS report is a mandatory element.",
-            "type": "string",
-            "minLength": 20,
-            "maxLength": 250
-        },
-        "CoverSheetIncluded": {
-            "description": "Required for all TPS Reports submitted after 2/19/1999",
-            "type": "boolean"
-        },
-        "DueDate": {
-            "$ref": "#/definitions/InitechDateFormat"
-        },
-        "ApprovalDate": {
-            "$ref": "#/definitions/InitechDateFormat"
-        },
-        "Memo": {
-            "type": "string"
-        },
-        "SecondCopyOfMemo": {
-            "description": "In case you didn't get the first one.",
-            "type": "string"
-        },
-        "TestCode": {
-            "type": "string",
-            "enum": [
-                "NOT_STARTED",
-                "CANCELLED"
+    "definitions": {
+        "IpFilter": {
+            "description": "Receipt IP address filters enable you to specifically accept or reject incoming email that originates from an IP address or range of IP addresses. For information about setting up IP address filters, see the Amazon SES Developer Guide.",
+            "properties": {
+                "Cidr": {
+                    "description": "An IP address or a range of IP addresses that you want to block or allow, specified in Classless Inter-Domain Routing (CIDR) notation. An example of a single email address is 10.0.0.1. An example of a range of IP addresses is 10.0.0.1/24. For more information about CIDR notation, see RFC 2317.",
+                    "type": "string",
+                    "examples": [
+                        "10.0.0.1/24",
+                        "192.0.2.128/26"
+                    ],
+                    "pattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(3[0-2]|[1-2][0-9]|[0-9]))$"
+                },
+                "Policy": {
+                    "description": "Indicates whether to block or allow incoming mail from the specified IP addresses.",
+                    "type": "string",
+                    "enum": [
+                        "Block",
+                        "Allow"
+                    ]
+                }
+            },
+            "required": [
+                "Cidr",
+                "Policy"
             ]
         },
-        "Authors": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
+        "IpFilterName": {
+            "description": "The name of the IP address filter.",
+            "type": "string",
+            "pattern": "(^[a-zA-Z0-9]$)|(^[a-zA-Z0-9]([a-zA-Z0-9\\._-])*[a-zA-Z0-9]$)",
+            "maxLength": 64
         }
     },
-    "required": [
-        "Title",
-        "DueDate"
-    ],
-    "readOnlyProperties": [
-        "/properties/TPSCode"
+    "createOnlyProperties": [
+        "/properties/Filter"
     ],
     "primaryIdentifier": [
-        "/properties/TPSCode"
+        "/properties/Filter"
     ],
-    "handlers": {
-        "create": {
-            "permissions": [
-                "initech:CreateReport"
-            ]
-        },
-        "read": {
-            "permissions": [
-                "initech:DescribeReport"
-            ]
-        },
-        "update": {
-            "permissions": [
-                "initech:UpdateReport"
-            ]
-        },
-        "delete": {
-            "permissions": [
-                "initech:DeleteReport"
-            ]
-        },
-        "list": {
-            "permissions": [
-                "initech:ListReports"
-            ]
-        }
-    }
+    "additionalProperties": false
 }
