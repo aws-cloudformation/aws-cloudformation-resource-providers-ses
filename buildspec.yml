@@ -37,3 +37,5 @@ phases:
       - cd "$CODEBUILD_SRC_DIR"
       - cd aws-ses-configurationset
       - mvn clean verify --no-transfer-progress
+    finally:
+      - cat "$CODEBUILD_SRC_DIR/aws-ses-configurationset/rpdk.log"
