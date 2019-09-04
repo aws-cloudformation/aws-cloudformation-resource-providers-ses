@@ -1,4 +1,4 @@
-package com.aws.ses.receiptfilter;
+package com.amazonaws.ses.receiptfilter;
 
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.Logger;
@@ -6,7 +6,7 @@ import com.amazonaws.cloudformation.proxy.ProgressEvent;
 import com.amazonaws.cloudformation.proxy.OperationStatus;
 import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
 
-public class CreateHandler extends BaseHandler<CallbackContext> {
+public class ReadHandler extends BaseHandler<CallbackContext> {
 
     @Override
     public ProgressEvent<ResourceModel, CallbackContext> handleRequest(

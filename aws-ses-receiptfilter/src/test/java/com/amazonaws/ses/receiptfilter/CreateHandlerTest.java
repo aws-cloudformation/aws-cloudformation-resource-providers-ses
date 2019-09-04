@@ -1,4 +1,4 @@
-package com.aws.ses.receiptfilter;
+package com.amazonaws.ses.receiptfilter;
 
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.Logger;
@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
-public class DeleteHandlerTest {
+public class CreateHandlerTest {
 
     @Mock
     private AmazonWebServicesClientProxy proxy;
@@ -31,7 +31,7 @@ public class DeleteHandlerTest {
 
     @Test
     public void handleRequest_SimpleSuccess() {
-        final DeleteHandler handler = new DeleteHandler();
+        final CreateHandler handler = new CreateHandler();
 
         final ResourceModel model = ResourceModel.builder().build();
 
