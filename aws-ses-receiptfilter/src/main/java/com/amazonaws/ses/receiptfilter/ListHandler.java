@@ -4,10 +4,9 @@ import com.amazonaws.cloudformation.proxy.*;
 import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.ListReceiptFiltersRequest;
 import software.amazon.awssdk.services.ses.model.ListReceiptFiltersResponse;
-import software.amazon.awssdk.services.ses.model.ReceiptFilter;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ListHandler extends BaseHandler<CallbackContext> {
     private AmazonWebServicesClientProxy proxy;
@@ -29,18 +28,9 @@ public class ListHandler extends BaseHandler<CallbackContext> {
 
     private List<ResourceModel> listReceiptFilters() {
         final ListReceiptFiltersResponse response = this.proxy.injectCredentialsAndInvokeV2(ListReceiptFiltersRequest.builder().build(), this.client::listReceiptFilters);
-        List<ResourceModel> models = new ArrayList<>();
-        response.filters().forEach(f -> {
-            final ResourceModel model = ResourceModel.builder().filter(createFilter(f)).build();
-            models.add(model);
-        });
-        return models;
-    }
-
-    private Filter createFilter(ReceiptFilter receiptFilter) {
-        final IpFilter ipFilter = IpFilter.builder()
-                .cidr(receiptFilter.ipFilter().cidr())
-                .policy(receiptFilter.ipFilter().policy().name()).build();
-        return Filter.builder().ipFilter(ipFilter).name(receiptFilter.name()).build();
+        return response.filters()
+                .stream()
+                .map(f -> ResourceModel.builder().filter(Translator.translate(f)).build())
+                .collect(Collectors.toList());
     }
 }

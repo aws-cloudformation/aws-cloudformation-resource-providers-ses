@@ -1,6 +1,10 @@
 package com.amazonaws.ses.receiptfilter;
 
-import com.amazonaws.cloudformation.proxy.*;
+import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
+import com.amazonaws.cloudformation.proxy.Logger;
+import com.amazonaws.cloudformation.proxy.OperationStatus;
+import com.amazonaws.cloudformation.proxy.ProgressEvent;
+import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,11 +42,11 @@ public class ListHandlerTest {
     public void handleRequest_SimpleSuccess() {
         final ListHandler handler = new ListHandler();
         final ReceiptFilter filter1 = ReceiptFilter.builder()
-                .ipFilter(ReceiptIpFilter.builder().cidr("10.0.0.1/24").policy("ALLOW").build())
+                .ipFilter(ReceiptIpFilter.builder().cidr("10.0.0.1/24").policy("Allow").build())
                 .name("test1")
                 .build();
         final ReceiptFilter filter2 = ReceiptFilter.builder()
-                .ipFilter(ReceiptIpFilter.builder().cidr("192.0.2.128/26").policy("BLOCK").build())
+                .ipFilter(ReceiptIpFilter.builder().cidr("192.0.2.128/26").policy("Block").build())
                 .name("test2")
                 .build();
         List<ReceiptFilter> receiptFilters = Stream.of(filter1, filter2).collect(Collectors.toCollection(ArrayList::new));

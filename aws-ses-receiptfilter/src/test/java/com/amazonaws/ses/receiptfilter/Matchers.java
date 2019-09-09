@@ -10,7 +10,7 @@ public class Matchers {
         assertThat(rawModel).isInstanceOf(ResourceModel.class);
         ResourceModel model = (ResourceModel) rawModel;
         assertThat(model.getFilter().getIpFilter().getCidr()).isEqualTo(sdkModel.ipFilter().cidr());
-        assertThat(model.getFilter().getIpFilter().getPolicy()).isEqualTo(sdkModel.ipFilter().policy().name());
+        assertThat(model.getFilter().getIpFilter().getPolicy()).isEqualTo(sdkModel.ipFilter().policy().toString());
         assertThat(model.getFilter().getName()).isEqualTo(sdkModel.name());
     }
 }
