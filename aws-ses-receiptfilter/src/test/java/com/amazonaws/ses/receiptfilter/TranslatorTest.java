@@ -1,12 +1,8 @@
 package com.amazonaws.ses.receiptfilter;
 
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
 
 public class TranslatorTest {
     @Test
@@ -17,8 +13,8 @@ public class TranslatorTest {
                 .build();
         final com.amazonaws.ses.receiptfilter.IpFilter out = Translator.translate(in);
         final software.amazon.awssdk.services.ses.model.ReceiptIpFilter result  = Translator.translate(out);
-        assertThat(out, is(not(nullValue())));
-        assertThat(result, is(equalTo(in)));
+        assertThat(out).isNotNull();
+        assertThat(in).isEqualTo(result);
     }
 
     @Test
@@ -32,7 +28,7 @@ public class TranslatorTest {
                 .build();
         final com.amazonaws.ses.receiptfilter.Filter out = Translator.translate(in);
         final software.amazon.awssdk.services.ses.model.ReceiptFilter result = Translator.translate(out);
-        assertThat(out, is(not(nullValue())));
-        assertThat(result, is(equalTo(in)));
+        assertThat(out).isNotNull();
+        assertThat(in).isEqualTo(result);
     }
 }

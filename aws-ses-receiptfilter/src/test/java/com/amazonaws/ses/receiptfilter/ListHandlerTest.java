@@ -21,7 +21,9 @@ import java.util.stream.Stream;
 
 import static com.amazonaws.ses.receiptfilter.Matchers.assertThatModelsAreEqual;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ListHandlerTest {
@@ -65,12 +67,10 @@ public class ListHandlerTest {
         assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
         assertThat(response.getResourceModel()).isNull();
         assertThat(response.getResourceModels()).isNotNull();
-        assertThat(response.getResourceModels().size()).isEqualTo(2);
+        assertThat(response.getResourceModels()).hasSize(2);
         assertThatModelsAreEqual(response.getResourceModels().get(0), filter1);
         assertThatModelsAreEqual(response.getResourceModels().get(1), filter2);
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
     }
-
-
 }
