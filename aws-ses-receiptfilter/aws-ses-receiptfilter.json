@@ -15,7 +15,8 @@
                 }
             },
             "required": [
-                "IpFilter"
+                "IpFilter",
+                "Name"
             ]
         }
     },
@@ -57,7 +58,7 @@
         "/properties/Filter"
     ],
     "primaryIdentifier": [
-        "/properties/Filter"
+        "/properties/Filter/Name"
     ],
     "additionalProperties": false
 }
