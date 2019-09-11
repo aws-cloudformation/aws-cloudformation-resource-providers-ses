@@ -18,7 +18,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
     private AmazonWebServicesClientProxy proxy;
     private SesClient client;
     private Logger logger;
-    public static final int MAX_LENGTH_CONFIGURATION_SET_NAME = 64;
+    public static final int MAX_LENGTH_RECEIPTFILTER_NAME = 64;
 
     @Override
     public ProgressEvent<ResourceModel,
@@ -31,7 +31,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         this.client = ClientBuilder.getClient();
         this.logger = logger;
 
-        if (callbackContext != null && callbackContext.getIsStabilization()) {
+        if (callbackContext != null && callbackContext.getStabilization()) {
             return stabilizeReceiptFilter(proxy, callbackContext, request);
         } else {
             return createReceiptFilter(proxy, request);
@@ -49,7 +49,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                     IdentifierUtils.generateResourceIdentifier(
                             request.getLogicalResourceIdentifier(),
                             request.getClientRequestToken(),
-                            MAX_LENGTH_CONFIGURATION_SET_NAME
+                            MAX_LENGTH_RECEIPTFILTER_NAME
                     )
             );
         }
@@ -63,7 +63,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
             throw new ResourceAlreadyExistsException(ResourceModel.TYPE_NAME, model.getFilter().getName());
         }
         CallbackContext stabilizationContext = CallbackContext.builder()
-                .isStabilization(true)
+                .stabilization(true)
                 .build();
         return ProgressEvent.defaultInProgressHandler(
                 stabilizationContext,

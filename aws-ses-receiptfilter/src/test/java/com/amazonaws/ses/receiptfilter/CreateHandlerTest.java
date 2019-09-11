@@ -54,7 +54,7 @@ public class CreateHandlerTest {
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(OperationStatus.IN_PROGRESS);
         assertThat(response.getCallbackContext()).isNotNull();
-        assertThat(response.getCallbackContext().getIsStabilization()).isTrue();
+        assertThat(response.getCallbackContext().getStabilization()).isTrue();
         assertThat(response.getCallbackDelaySeconds()).isEqualTo(5);
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getResourceModel()).isEqualTo(model);
@@ -66,7 +66,7 @@ public class CreateHandlerTest {
     public void handleRequest_Stabilize() {
         final CreateHandler handler = new CreateHandler();
         final CallbackContext callbackContext = CallbackContext.builder()
-                .isStabilization(true)
+                .stabilization(true)
                 .build();
         final ReceiptFilter existingFilter = ReceiptFilter.builder()
                 .ipFilter(ReceiptIpFilter.builder().cidr("10.0.0.1/24").policy("Allow").build())
@@ -124,7 +124,7 @@ public class CreateHandlerTest {
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(OperationStatus.IN_PROGRESS);
         assertThat(response.getCallbackContext()).isNotNull();
-        assertThat(response.getCallbackContext().getIsStabilization()).isTrue();
+        assertThat(response.getCallbackContext().getStabilization()).isTrue();
         assertThat(response.getCallbackDelaySeconds()).isEqualTo(5);
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getResourceModel()).isEqualTo(model);

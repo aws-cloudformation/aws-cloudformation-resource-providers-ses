@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class CallbackContext {
-    private Boolean isStabilization;
+    private Boolean stabilization;
 }
