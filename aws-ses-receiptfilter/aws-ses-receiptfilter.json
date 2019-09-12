@@ -1,7 +1,7 @@
 {
     "typeName": "AWS::SES::ReceiptFilter",
     "description": "Specify a new IP address filter. You use IP address filters when you receive email with Amazon SES. For more information, see the Amazon SES Developer Guide.",
-    "sourceUrl": "git@github.com:aws-cloudformation/aws-cloudformation-resource-providers-ses.git",
+    "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-ses.git",
     "properties": {
         "Filter": {
             "description": "A data structure that describes the IP address filter that you want to specify. This structure consists of a name, an IP address range, and whether to allow or block mail from it.",
