@@ -1,6 +1,7 @@
 package com.amazonaws.ses.receiptfilter;
 
 import com.amazonaws.cloudformation.exceptions.ResourceAlreadyExistsException;
+import com.amazonaws.cloudformation.exceptions.ResourceNotFoundException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.Logger;
 import com.amazonaws.cloudformation.proxy.ProgressEvent;
@@ -12,12 +13,11 @@ import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.AlreadyExistsException;
 import software.amazon.awssdk.services.ses.model.CreateReceiptFilterRequest;
 
-import java.util.Optional;
-
 public class CreateHandler extends BaseHandler<CallbackContext> {
     private AmazonWebServicesClientProxy proxy;
     private SesClient client;
     private Logger logger;
+    private ReceiptFilterUtil receiptFilterUtil;
     public static final int MAX_LENGTH_RECEIPTFILTER_NAME = 64;
 
     @Override
@@ -30,6 +30,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         this.proxy = proxy;
         this.client = ClientBuilder.getClient();
         this.logger = logger;
+        this.receiptFilterUtil = ReceiptFilterUtil.builder().logger(logger).build();
 
         if (callbackContext != null && callbackContext.getStabilization()) {
             return stabilizeReceiptFilter(proxy, callbackContext, request);
@@ -53,14 +54,16 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                     )
             );
         }
+        final String receiptFilterName = receiptFilterUtil.getPrimaryIdentifier(model);
         try {
             final CreateReceiptFilterRequest createReceiptFilterRequest = CreateReceiptFilterRequest.builder()
                     .filter(Translator.translate(model.getFilter()))
                     .build();
+            //API Documentation : https://docs.aws.amazon.com/ses/latest/APIReference/API_CreateReceiptFilter.html
             this.proxy.injectCredentialsAndInvokeV2(createReceiptFilterRequest, this.client::createReceiptFilter);
-            logger.log(String.format("%s [%s] created successfully", ResourceModel.TYPE_NAME, model.getFilter().getName()));
+            logger.log(String.format("%s [%s] created successfully", ResourceModel.TYPE_NAME, receiptFilterName));
         } catch (AlreadyExistsException e) {
-            throw new ResourceAlreadyExistsException(ResourceModel.TYPE_NAME, model.getFilter().getName());
+            throw new ResourceAlreadyExistsException(ResourceModel.TYPE_NAME, receiptFilterName);
         }
         CallbackContext stabilizationContext = CallbackContext.builder()
                 .stabilization(true)
@@ -75,23 +78,15 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                                                                                  final @NonNull CallbackContext callbackContext,
                                                                                  final @NonNull ResourceHandlerRequest<ResourceModel> request) {
         final ResourceModel model = request.getDesiredResourceState();
-        final Optional<ResourceModel> readReceiptFilterResult = readReceiptFilter(proxy, request);
-        if (readReceiptFilterResult.isPresent()) {
-            return ProgressEvent.defaultSuccessHandler(readReceiptFilterResult.get());
+        try {
+            final ResourceModel readModel = receiptFilterUtil.readReceiptFilter(proxy, request);
+            return ProgressEvent.defaultSuccessHandler(readModel);
+        } catch (final ResourceNotFoundException e) {
+            // resource not yet found, re-invoke
+            return ProgressEvent.defaultInProgressHandler(
+                    callbackContext,
+                    5,
+                    model);
         }
-        return ProgressEvent.defaultInProgressHandler(
-                callbackContext,
-                5,
-                model);
-    }
-
-    private Optional<ResourceModel> readReceiptFilter(final @NonNull AmazonWebServicesClientProxy proxy,
-                                                      final @NonNull ResourceHandlerRequest<ResourceModel> request) {
-        final ResourceModel model = request.getDesiredResourceState();
-        final ProgressEvent<ResourceModel, CallbackContext> listResult = new ListHandler().handleRequest(proxy, request, null, this.logger);
-        final Optional<ResourceModel> receiptFilterModel = listResult.getResourceModels().stream()
-                .filter(listModel -> listModel.getFilter().getName().equals(model.getFilter().getName()))
-                .findFirst();
-        return receiptFilterModel;
     }
 }

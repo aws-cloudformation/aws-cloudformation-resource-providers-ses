@@ -4,13 +4,10 @@ import com.amazonaws.cloudformation.exceptions.ResourceNotFoundException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.Logger;
 import com.amazonaws.cloudformation.proxy.ProgressEvent;
-import com.amazonaws.cloudformation.proxy.OperationStatus;
 import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
 import lombok.NonNull;
 import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.DeleteReceiptFilterRequest;
-
-import java.util.Optional;
 
 public class DeleteHandler extends BaseHandler<CallbackContext> {
     private AmazonWebServicesClientProxy proxy;
