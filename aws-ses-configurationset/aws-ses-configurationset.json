@@ -20,6 +20,7 @@
     "handlers": {
         "create": {
             "permissions": [
+                "ses:DescribeConfigurationSet",
                 "ses:CreateConfigurationSet"
             ]
         },
@@ -30,6 +31,7 @@
         },
         "delete": {
             "permissions": [
+                "ses:DescribeConfigurationSet",
                 "ses:DeleteConfigurationSet"
             ]
         },
