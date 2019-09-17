@@ -1,11 +1,7 @@
 package com.amazonaws.ses.receiptfilter;
 
-import com.amazonaws.cloudformation.exceptions.ResourceAlreadyExistsException;
 import com.amazonaws.cloudformation.exceptions.ResourceNotFoundException;
-import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
-import com.amazonaws.cloudformation.proxy.Logger;
-import com.amazonaws.cloudformation.proxy.ProgressEvent;
-import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
+import com.amazonaws.cloudformation.proxy.*;
 import com.amazonaws.cloudformation.resource.IdentifierUtils;
 import com.amazonaws.util.StringUtils;
 import lombok.NonNull;
@@ -63,7 +59,9 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
             this.proxy.injectCredentialsAndInvokeV2(createReceiptFilterRequest, this.client::createReceiptFilter);
             logger.log(String.format("%s [%s] created successfully", ResourceModel.TYPE_NAME, receiptFilterName));
         } catch (AlreadyExistsException e) {
-            throw new ResourceAlreadyExistsException(ResourceModel.TYPE_NAME, receiptFilterName);
+            final String errorMessage = Translator.buildResourceAlreadyExistsErrorMessage(receiptFilterName);
+            logger.log(errorMessage);
+            return ProgressEvent.failed(null, null, HandlerErrorCode.AlreadyExists, errorMessage);
         }
         CallbackContext stabilizationContext = CallbackContext.builder()
                 .stabilization(true)

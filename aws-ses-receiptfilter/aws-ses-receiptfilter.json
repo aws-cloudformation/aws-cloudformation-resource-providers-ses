@@ -8,10 +8,36 @@
             "type": "object",
             "properties": {
                 "IpFilter": {
-                    "$ref": "#/definitions/IpFilter"
+                    "description": "Receipt IP address filters enable you to specifically accept or reject incoming email that originates from an IP address or range of IP addresses. For information about setting up IP address filters, see the Amazon SES Developer Guide.",
+                    "properties": {
+                        "Cidr": {
+                            "description": "An IP address or a range of IP addresses that you want to block or allow, specified in Classless Inter-Domain Routing (CIDR) notation. An example of a single email address is 10.0.0.1. An example of a range of IP addresses is 10.0.0.1/24. For more information about CIDR notation, see RFC 2317.",
+                            "type": "string",
+                            "examples": [
+                                "10.0.0.1/24",
+                                "192.0.2.128/26"
+                            ],
+                            "pattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(3[0-2]|[1-2][0-9]|[0-9]))$"
+                        },
+                        "Policy": {
+                            "description": "Indicates whether to block or allow incoming mail from the specified IP addresses.",
+                            "type": "string",
+                            "enum": [
+                                "Block",
+                                "Allow"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "Cidr",
+                        "Policy"
+                    ]
                 },
                 "Name": {
-                    "$ref": "#/definitions/IpFilterName"
+                    "description": "The name of the IP address filter.",
+                    "type": "string",
+                    "pattern": "(^[a-zA-Z0-9]$)|(^[a-zA-Z0-9]([a-zA-Z0-9\\._-])*[a-zA-Z0-9]$)",
+                    "maxLength": 64
                 }
             },
             "required": [
@@ -20,45 +46,30 @@
             ]
         }
     },
-    "definitions": {
-        "IpFilter": {
-            "description": "Receipt IP address filters enable you to specifically accept or reject incoming email that originates from an IP address or range of IP addresses. For information about setting up IP address filters, see the Amazon SES Developer Guide.",
-            "properties": {
-                "Cidr": {
-                    "description": "An IP address or a range of IP addresses that you want to block or allow, specified in Classless Inter-Domain Routing (CIDR) notation. An example of a single email address is 10.0.0.1. An example of a range of IP addresses is 10.0.0.1/24. For more information about CIDR notation, see RFC 2317.",
-                    "type": "string",
-                    "examples": [
-                        "10.0.0.1/24",
-                        "192.0.2.128/26"
-                    ],
-                    "pattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(3[0-2]|[1-2][0-9]|[0-9]))$"
-                },
-                "Policy": {
-                    "description": "Indicates whether to block or allow incoming mail from the specified IP addresses.",
-                    "type": "string",
-                    "enum": [
-                        "Block",
-                        "Allow"
-                    ]
-                }
-            },
-            "required": [
-                "Cidr",
-                "Policy"
-            ]
-        },
-        "IpFilterName": {
-            "description": "The name of the IP address filter.",
-            "type": "string",
-            "pattern": "(^[a-zA-Z0-9]$)|(^[a-zA-Z0-9]([a-zA-Z0-9\\._-])*[a-zA-Z0-9]$)",
-            "maxLength": 64
-        }
-    },
     "createOnlyProperties": [
         "/properties/Filter"
     ],
     "primaryIdentifier": [
         "/properties/Filter/Name"
     ],
-    "additionalProperties": false
+    "additionalProperties": false,
+    "handlers": {
+        "create": {
+            "permissions": [
+                "ses:ListReceiptFilters ",
+                "ses:CreateReceiptFilter"
+            ]
+        },
+        "delete": {
+            "permissions": [
+                "ses:ListReceiptFilters",
+                "ses:DeleteReceiptFilter "
+            ]
+        },
+        "list": {
+            "permissions": [
+                "ses:ListReceiptFilters"
+            ]
+        }
+    }
 }

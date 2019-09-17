@@ -31,4 +31,11 @@ public class Translator {
                 .name(in.getName())
                 .build();
     }
+
+    public static String buildResourceAlreadyExistsErrorMessage(final String resourceIdentifier) {
+        return String.format("Resource of type '%s' with identifier '%s' already exists.",
+                ResourceModel.TYPE_NAME,
+                resourceIdentifier);
+    }
+
 }
