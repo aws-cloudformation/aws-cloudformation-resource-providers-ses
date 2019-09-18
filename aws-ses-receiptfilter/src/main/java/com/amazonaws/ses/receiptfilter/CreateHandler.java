@@ -13,7 +13,6 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
     private AmazonWebServicesClientProxy proxy;
     private SesClient client;
     private Logger logger;
-    private ReceiptFilterUtil receiptFilterUtil;
     public static final int MAX_LENGTH_RECEIPTFILTER_NAME = 64;
 
     @Override
@@ -26,7 +25,6 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         this.proxy = proxy;
         this.client = ClientBuilder.getClient();
         this.logger = logger;
-        this.receiptFilterUtil = ReceiptFilterUtil.builder().logger(logger).build();
 
         if (callbackContext != null && callbackContext.getStabilization()) {
             return stabilizeReceiptFilter(proxy, callbackContext, request);
@@ -50,7 +48,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                     )
             );
         }
-        final String receiptFilterName = receiptFilterUtil.getPrimaryIdentifier(model);
+        final String receiptFilterName = model.getFilter().getName();
         try {
             final CreateReceiptFilterRequest createReceiptFilterRequest = CreateReceiptFilterRequest.builder()
                     .filter(Translator.translate(model.getFilter()))
@@ -59,8 +57,8 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
             this.proxy.injectCredentialsAndInvokeV2(createReceiptFilterRequest, this.client::createReceiptFilter);
             logger.log(String.format("%s [%s] created successfully", ResourceModel.TYPE_NAME, receiptFilterName));
         } catch (AlreadyExistsException e) {
-            final String errorMessage = Translator.buildResourceAlreadyExistsErrorMessage(receiptFilterName);
-            logger.log(errorMessage);
+            final String errorMessage = "An existing resource was found";
+            logger.log(String.format(errorMessage + " of type  '%s' with identifier '%s'", ResourceModel.TYPE_NAME, receiptFilterName));
             return ProgressEvent.failed(null, null, HandlerErrorCode.AlreadyExists, errorMessage);
         }
         CallbackContext stabilizationContext = CallbackContext.builder()
@@ -76,15 +74,17 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                                                                                  final @NonNull CallbackContext callbackContext,
                                                                                  final @NonNull ResourceHandlerRequest<ResourceModel> request) {
         final ResourceModel model = request.getDesiredResourceState();
-        try {
-            final ResourceModel readModel = receiptFilterUtil.readReceiptFilter(proxy, request);
-            return ProgressEvent.defaultSuccessHandler(readModel);
-        } catch (final ResourceNotFoundException e) {
-            // resource not yet found, re-invoke
-            return ProgressEvent.defaultInProgressHandler(
-                    callbackContext,
-                    5,
-                    model);
+        final ProgressEvent<ResourceModel, CallbackContext> readResult =
+                new ReadHandler().handleRequest(proxy, request, null, this.logger);
+        if (readResult.isSuccess()) {
+            return ProgressEvent.defaultSuccessHandler(readResult.getResourceModel());
         }
+        if (readResult.isFailed() && readResult.getErrorCode().equals(HandlerErrorCode.NotFound)) {
+            // resource not yet found, re-invoke
+        }
+        return ProgressEvent.defaultInProgressHandler(
+                callbackContext,
+                5,
+                model);
     }
 }

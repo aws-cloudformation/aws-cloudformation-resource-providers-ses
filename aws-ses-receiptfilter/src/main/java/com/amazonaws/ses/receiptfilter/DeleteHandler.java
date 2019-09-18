@@ -1,19 +1,15 @@
 package com.amazonaws.ses.receiptfilter;
 
-import com.amazonaws.cloudformation.exceptions.ResourceNotFoundException;
-import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
-import com.amazonaws.cloudformation.proxy.Logger;
-import com.amazonaws.cloudformation.proxy.ProgressEvent;
-import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
+import com.amazonaws.cloudformation.proxy.*;
 import lombok.NonNull;
 import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.DeleteReceiptFilterRequest;
+import software.amazon.awssdk.services.ses.model.DeleteReceiptFilterResponse;
 
 public class DeleteHandler extends BaseHandler<CallbackContext> {
     private AmazonWebServicesClientProxy proxy;
     private SesClient client;
     private Logger logger;
-    private ReceiptFilterUtil receiptFilterUtil;
 
     @Override
     public ProgressEvent<ResourceModel, CallbackContext> handleRequest(
@@ -24,7 +20,6 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
         this.proxy = proxy;
         this.client = ClientBuilder.getClient();
         this.logger = logger;
-        this.receiptFilterUtil = ReceiptFilterUtil.builder().logger(logger).build();
 
         if (callbackContext != null && callbackContext.getStabilization()) {
             return stabilizeReceiptFilter(proxy, callbackContext, request);
@@ -36,14 +31,23 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
     private ProgressEvent<ResourceModel, CallbackContext> deleteReceiptFilter(final @NonNull AmazonWebServicesClientProxy proxy,
                                                                               final @NonNull ResourceHandlerRequest<ResourceModel> request) {
         final ResourceModel model = request.getDesiredResourceState();
-        final String receiptFilterName = receiptFilterUtil.getPrimaryIdentifier(model);
+        final String receiptFilterName = model.getFilter().getName();
+
+        //check if resource exists
+        final ProgressEvent<ResourceModel, CallbackContext> readResult =
+                new ReadHandler().handleRequest(proxy, request, null, this.logger);
+        if (readResult.isFailed() && readResult.getErrorCode().equals(HandlerErrorCode.NotFound)) {
+            final String errorMessage = "A requested resource was not found";
+            logger.log(String.format(errorMessage + " of type  '%s' with identifier '%s'", ResourceModel.TYPE_NAME, receiptFilterName));
+            return ProgressEvent.failed(null, null, HandlerErrorCode.NotFound, errorMessage);
+        }
+
         DeleteReceiptFilterRequest deleteReceiptFilterRequest = DeleteReceiptFilterRequest.builder()
                 .filterName(receiptFilterName)
                 .build();
         // API Documentation - https://docs.aws.amazon.com/ses/latest/APIReference/API_DeleteReceiptFilter.html
         this.proxy.injectCredentialsAndInvokeV2(deleteReceiptFilterRequest, this.client::deleteReceiptFilter);
         logger.log(String.format("%s [%s] deleted successfully", ResourceModel.TYPE_NAME, receiptFilterName));
-
         CallbackContext stabilizationContext = CallbackContext.builder()
                 .stabilization(true)
                 .build();
@@ -57,10 +61,14 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
                                                                                  final @NonNull CallbackContext callbackContext,
                                                                                  final @NonNull ResourceHandlerRequest<ResourceModel> request) {
         ResourceModel model = request.getDesiredResourceState();
-        try {
-            receiptFilterUtil.readReceiptFilter(proxy, request);
-        } catch (final ResourceNotFoundException e) {
+        final ProgressEvent<ResourceModel, CallbackContext> readResult =
+                new ReadHandler().handleRequest(proxy, request, null, this.logger);
+
+        if (readResult.isFailed() && readResult.getErrorCode().equals(HandlerErrorCode.NotFound)) {
             return ProgressEvent.defaultSuccessHandler(null);
+        }
+        if (readResult.isSuccess()) {
+            //resource still exists, re-invoke delete
         }
         return ProgressEvent.defaultInProgressHandler(
                 callbackContext,

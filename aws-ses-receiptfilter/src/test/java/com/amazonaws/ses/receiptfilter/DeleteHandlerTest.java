@@ -12,8 +12,10 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.services.ses.model.ListReceiptFiltersRequest;
 import software.amazon.awssdk.services.ses.model.ListReceiptFiltersResponse;
 import software.amazon.awssdk.services.ses.model.ReceiptFilter;
+import software.amazon.awssdk.services.ses.model.ReceiptIpFilter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +55,13 @@ public class DeleteHandlerTest {
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
                 .build();
+        final ListReceiptFiltersResponse listResponse = ListReceiptFiltersResponse.builder().filters(Translator.translate(filter)).build();
+        doReturn(listResponse)
+                .when(proxy)
+                .injectCredentialsAndInvokeV2(
+                        ArgumentMatchers.any(ListReceiptFiltersRequest.class),
+                        ArgumentMatchers.any()
+                );
 
         final ProgressEvent<ResourceModel, CallbackContext> response
                 = handler.handleRequest(proxy, request, null, logger);
@@ -66,6 +75,32 @@ public class DeleteHandlerTest {
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
+    }
+
+    @Test
+    public void handleRequest_ResourceNotFound() {
+        final DeleteHandler handler = new DeleteHandler();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+        final ListReceiptFiltersResponse listResponse = ListReceiptFiltersResponse.builder().build();
+        doReturn(listResponse)
+                .when(proxy)
+                .injectCredentialsAndInvokeV2(
+                        ArgumentMatchers.any(ListReceiptFiltersRequest.class),
+                        ArgumentMatchers.any()
+                );
+
+        final ProgressEvent<ResourceModel, CallbackContext> response
+                = handler.handleRequest(proxy, request, null, logger);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.FAILED);
+        assertThat(response.getCallbackContext()).isNull();
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+        assertThat(response.getResourceModel()).isNull();
+        assertThat(response.getResourceModels()).isNull();
     }
 
     @Test
