@@ -16,5 +16,29 @@
     "primaryIdentifier": [
         "/properties/Name"
     ],
-    "additionalProperties": false
+    "additionalProperties": false,
+    "handlers": {
+        "create": {
+            "permissions": [
+                "ses:DescribeConfigurationSet",
+                "ses:CreateConfigurationSet"
+            ]
+        },
+        "read": {
+            "permissions": [
+                "ses:DescribeConfigurationSet"
+            ]
+        },
+        "delete": {
+            "permissions": [
+                "ses:DescribeConfigurationSet",
+                "ses:DeleteConfigurationSet"
+            ]
+        },
+        "list": {
+            "permissions": [
+                "ses:ListConfigurationSets"
+            ]
+        }
+    }
 }
