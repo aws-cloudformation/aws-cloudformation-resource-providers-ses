@@ -1,10 +1,6 @@
 package com.amazonaws.ses.receiptfilter;
 
-import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
-import com.amazonaws.cloudformation.proxy.Logger;
-import com.amazonaws.cloudformation.proxy.OperationStatus;
-import com.amazonaws.cloudformation.proxy.ProgressEvent;
-import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
+import com.amazonaws.cloudformation.proxy.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +11,6 @@ import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.services.ses.model.ListReceiptFiltersRequest;
 import software.amazon.awssdk.services.ses.model.ListReceiptFiltersResponse;
 import software.amazon.awssdk.services.ses.model.ReceiptFilter;
-import software.amazon.awssdk.services.ses.model.ReceiptIpFilter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,15 +87,8 @@ public class DeleteHandlerTest {
                         ArgumentMatchers.any()
                 );
 
-        final ProgressEvent<ResourceModel, CallbackContext> response
-                = handler.handleRequest(proxy, request, null, logger);
-
-        assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.FAILED);
-        assertThat(response.getCallbackContext()).isNull();
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response.getResourceModel()).isNull();
-        assertThat(response.getResourceModels()).isNull();
+        assertThrows(com.amazonaws.cloudformation.exceptions.ResourceNotFoundException.class,
+                () -> handler.handleRequest(proxy, request, null, logger));
     }
 
     @Test

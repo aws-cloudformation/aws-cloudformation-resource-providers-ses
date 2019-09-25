@@ -1,7 +1,11 @@
 package com.amazonaws.ses.receiptfilter;
 
+import com.amazonaws.cloudformation.exceptions.ResourceAlreadyExistsException;
 import com.amazonaws.cloudformation.exceptions.ResourceNotFoundException;
-import com.amazonaws.cloudformation.proxy.*;
+import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
+import com.amazonaws.cloudformation.proxy.Logger;
+import com.amazonaws.cloudformation.proxy.ProgressEvent;
+import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
 import com.amazonaws.cloudformation.resource.IdentifierUtils;
 import com.amazonaws.util.StringUtils;
 import lombok.NonNull;
@@ -57,9 +61,8 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
             this.proxy.injectCredentialsAndInvokeV2(createReceiptFilterRequest, this.client::createReceiptFilter);
             logger.log(String.format("%s [%s] created successfully", ResourceModel.TYPE_NAME, receiptFilterName));
         } catch (AlreadyExistsException e) {
-            final String errorMessage = "An existing resource was found";
-            logger.log(String.format(errorMessage + " of type  '%s' with identifier '%s'", ResourceModel.TYPE_NAME, receiptFilterName));
-            return ProgressEvent.failed(null, null, HandlerErrorCode.AlreadyExists, errorMessage);
+            // failing here would suggest a conflicting operation was performed out of band
+            throw new ResourceAlreadyExistsException(ResourceModel.TYPE_NAME, receiptFilterName);
         }
         CallbackContext stabilizationContext = CallbackContext.builder()
                 .stabilization(true)
@@ -74,12 +77,12 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                                                                                  final @NonNull CallbackContext callbackContext,
                                                                                  final @NonNull ResourceHandlerRequest<ResourceModel> request) {
         final ResourceModel model = request.getDesiredResourceState();
-        final ProgressEvent<ResourceModel, CallbackContext> readResult =
-                new ReadHandler().handleRequest(proxy, request, null, this.logger);
-        if (readResult.isSuccess()) {
+        // read to ensure resource exists
+        try {
+            final ProgressEvent<ResourceModel, CallbackContext> readResult =
+                    new ReadHandler().handleRequest(proxy, request, null, this.logger);
             return ProgressEvent.defaultSuccessHandler(readResult.getResourceModel());
-        }
-        if (readResult.isFailed() && readResult.getErrorCode().equals(HandlerErrorCode.NotFound)) {
+        } catch (final ResourceNotFoundException e) {
             // resource not yet found, re-invoke
         }
         return ProgressEvent.defaultInProgressHandler(

@@ -3,6 +3,7 @@
     "language": "java",
     "runtime": "java8",
     "entrypoint": "com.aws.ses.configurationset.HandlerWrapper::handleRequest",
+    "testEntrypoint": "com.aws.ses.configurationset.HandlerWrapper::testEntrypoint",
     "settings": {
         "namespace": [
             "com",
