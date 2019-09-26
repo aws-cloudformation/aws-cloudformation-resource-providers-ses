@@ -29,6 +29,7 @@ public class ListHandler extends BaseHandler<CallbackContext> {
     private List<ResourceModel> listReceiptFilters() {
         /*  API documentation : https://docs.aws.amazon.com/ses/latest/APIReference/API_ListReceiptFilters.html
         This API does not support pagination */
+
         final ListReceiptFiltersResponse response = this.proxy.injectCredentialsAndInvokeV2(ListReceiptFiltersRequest.builder().build(), this.client::listReceiptFilters);
         return response.filters()
                 .stream()

@@ -57,11 +57,11 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
             final CreateReceiptFilterRequest createReceiptFilterRequest = CreateReceiptFilterRequest.builder()
                     .filter(Translator.translate(model.getFilter()))
                     .build();
+
             //API Documentation : https://docs.aws.amazon.com/ses/latest/APIReference/API_CreateReceiptFilter.html
             this.proxy.injectCredentialsAndInvokeV2(createReceiptFilterRequest, this.client::createReceiptFilter);
             logger.log(String.format("%s [%s] created successfully", ResourceModel.TYPE_NAME, receiptFilterName));
         } catch (AlreadyExistsException e) {
-            // failing here would suggest a conflicting operation was performed out of band
             throw new ResourceAlreadyExistsException(ResourceModel.TYPE_NAME, receiptFilterName);
         }
         CallbackContext stabilizationContext = CallbackContext.builder()
