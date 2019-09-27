@@ -25,14 +25,13 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
         this.logger = logger;
 
         if (callbackContext != null && callbackContext.getStabilization()) {
-            return stabilizeReceiptFilter(proxy, callbackContext, request);
+            return stabilizeReceiptFilter(callbackContext, request);
         } else {
-            return deleteReceiptFilter(proxy, request);
+            return deleteReceiptFilter(request);
         }
     }
 
-    private ProgressEvent<ResourceModel, CallbackContext> deleteReceiptFilter(final @NonNull AmazonWebServicesClientProxy proxy,
-                                                                              final @NonNull ResourceHandlerRequest<ResourceModel> request) {
+    private ProgressEvent<ResourceModel, CallbackContext> deleteReceiptFilter(final @NonNull ResourceHandlerRequest<ResourceModel> request) {
         final ResourceModel model = request.getDesiredResourceState();
         final String receiptFilterName = model.getFilter().getName();
 
@@ -56,8 +55,7 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
                 model);
     }
 
-    private ProgressEvent<ResourceModel, CallbackContext> stabilizeReceiptFilter(final @NonNull AmazonWebServicesClientProxy proxy,
-                                                                                 final @NonNull CallbackContext callbackContext,
+    private ProgressEvent<ResourceModel, CallbackContext> stabilizeReceiptFilter(final @NonNull CallbackContext callbackContext,
                                                                                  final @NonNull ResourceHandlerRequest<ResourceModel> request) {
         ResourceModel model = request.getDesiredResourceState();
         try {

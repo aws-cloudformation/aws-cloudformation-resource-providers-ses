@@ -31,14 +31,13 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         this.logger = logger;
 
         if (callbackContext != null && callbackContext.getStabilization()) {
-            return stabilizeReceiptFilter(proxy, callbackContext, request);
+            return stabilizeReceiptFilter(callbackContext, request);
         } else {
-            return createReceiptFilter(proxy, request);
+            return createReceiptFilter(request);
         }
     }
 
-    private ProgressEvent<ResourceModel, CallbackContext> createReceiptFilter(final @NonNull AmazonWebServicesClientProxy proxy,
-                                                                              final @NonNull ResourceHandlerRequest<ResourceModel> request) {
+    private ProgressEvent<ResourceModel, CallbackContext> createReceiptFilter(final @NonNull ResourceHandlerRequest<ResourceModel> request) {
         final ResourceModel model = request.getDesiredResourceState();
         // resource can auto-generate a name if not supplied by caller
         // this logic should move up into the CloudFormation engine, but
@@ -73,8 +72,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                 model);
     }
 
-    private ProgressEvent<ResourceModel, CallbackContext> stabilizeReceiptFilter(final @NonNull AmazonWebServicesClientProxy proxy,
-                                                                                 final @NonNull CallbackContext callbackContext,
+    private ProgressEvent<ResourceModel, CallbackContext> stabilizeReceiptFilter(final @NonNull CallbackContext callbackContext,
                                                                                  final @NonNull ResourceHandlerRequest<ResourceModel> request) {
         final ResourceModel model = request.getDesiredResourceState();
         // read to ensure resource exists
