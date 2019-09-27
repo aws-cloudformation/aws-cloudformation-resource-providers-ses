@@ -3,6 +3,7 @@
     "language": "java",
     "runtime": "java8",
     "entrypoint": "com.amazonaws.ses.receiptfilter.HandlerWrapper::handleRequest",
+    "testEntrypoint": "com.amazonaws.ses.receiptfilter.HandlerWrapper::testEntrypoint",
     "settings": {
         "namespace": [
             "com",
