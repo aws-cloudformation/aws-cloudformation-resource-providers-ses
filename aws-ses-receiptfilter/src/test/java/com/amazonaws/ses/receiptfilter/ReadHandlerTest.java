@@ -30,8 +30,6 @@ public class ReadHandlerTest {
 
     @BeforeEach
     public void setup() {
-        proxy = mock(AmazonWebServicesClientProxy.class);
-        logger = mock(Logger.class);
         filter = Filter.builder().name("test").build();
         model = ResourceModel.builder().filter(filter).build();
     }

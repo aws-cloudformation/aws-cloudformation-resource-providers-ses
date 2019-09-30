@@ -34,12 +34,6 @@ public class ListHandlerTest {
     @Mock
     private Logger logger;
 
-    @BeforeEach
-    public void setup() {
-        proxy = mock(AmazonWebServicesClientProxy.class);
-        logger = mock(Logger.class);
-    }
-
     @Test
     public void handleRequest_SimpleSuccess() {
         final ListHandler handler = new ListHandler();
