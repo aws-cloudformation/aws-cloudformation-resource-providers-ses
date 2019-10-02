@@ -2,6 +2,7 @@ package com.amazonaws.ses.configurationseteventdestination;
 
 import software.amazon.awssdk.services.ses.model.CloudWatchDimensionConfiguration;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,6 +21,8 @@ public class Translator {
 
     private static software.amazon.awssdk.services.ses.model.CloudWatchDestination translate(com.amazonaws.ses.configurationseteventdestination.CloudWatchDestination in) {
         if (in == null) return null;
+        if (in.getDimensionConfigurations() == null || in.getDimensionConfigurations().isEmpty())
+            return software.amazon.awssdk.services.ses.model.CloudWatchDestination.builder().dimensionConfigurations(Collections.emptyList()).build();
         return software.amazon.awssdk.services.ses.model.CloudWatchDestination.builder()
                 .dimensionConfigurations(in.getDimensionConfigurations().stream().map(n -> translate(n)).collect(Collectors.toList()))
                 .build();

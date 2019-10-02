@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@JsonDeserialize(builder = CallbackContext.CallbackContextBuilder.class)
 public class CallbackContext {
     private Boolean stabilization;
 
