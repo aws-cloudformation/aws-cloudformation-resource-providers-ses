@@ -25,8 +25,6 @@ public class UpdateHandlerTest {
 
     @BeforeEach
     public void setup() {
-        proxy = mock(AmazonWebServicesClientProxy.class);
-        logger = mock(Logger.class);
     }
 
     @Test

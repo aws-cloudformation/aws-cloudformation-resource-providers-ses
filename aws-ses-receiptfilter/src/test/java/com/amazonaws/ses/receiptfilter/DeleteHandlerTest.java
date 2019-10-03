@@ -35,8 +35,6 @@ public class DeleteHandlerTest {
 
     @BeforeEach
     public void setup() {
-        proxy = mock(AmazonWebServicesClientProxy.class);
-        logger = mock(Logger.class);
         filter = Filter.builder().ipFilter(IpFilter.builder().cidr("10.0.0.1/24").policy("Allow").build())
                 .name("test")
                 .build();
