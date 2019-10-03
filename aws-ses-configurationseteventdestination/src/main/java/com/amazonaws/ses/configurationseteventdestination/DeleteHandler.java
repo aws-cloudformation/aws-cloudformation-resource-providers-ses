@@ -44,8 +44,10 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
             proxy.injectCredentialsAndInvokeV2(deleteConfigurationSetEventDestinationRequest, this.client::deleteConfigurationSetEventDestination);
             logger.log(String.format("%s [%s] deleted successfully",
                     ResourceModel.TYPE_NAME, configurationSetName + ":" + eventDestinationName));
-        } catch (ConfigurationSetDoesNotExistException | EventDestinationDoesNotExistException e) {
-            throw new ResourceNotFoundException(ResourceModel.TYPE_NAME, configurationSetName + ":" + eventDestinationName);
+        } catch (ConfigurationSetDoesNotExistException e) {
+            throw new ResourceNotFoundException(ResourceModel.TYPE_NAME, configurationSetName);
+        } catch (EventDestinationDoesNotExistException e) {
+            throw new ResourceNotFoundException(ResourceModel.TYPE_NAME, eventDestinationName);
         }
 
         CallbackContext stabilizationContext = CallbackContext.builder()

@@ -4,6 +4,7 @@ import com.amazonaws.cloudformation.exceptions.ResourceNotFoundException;
 import com.amazonaws.cloudformation.proxy.*;
 import lombok.NonNull;
 import software.amazon.awssdk.services.ses.SesClient;
+import software.amazon.awssdk.services.ses.model.ConfigurationSetAttribute;
 import software.amazon.awssdk.services.ses.model.ConfigurationSetDoesNotExistException;
 import software.amazon.awssdk.services.ses.model.DescribeConfigurationSetRequest;
 import software.amazon.awssdk.services.ses.model.DescribeConfigurationSetResponse;
@@ -35,9 +36,9 @@ public class ListHandler extends BaseHandler<CallbackContext> {
     }
 
     private List<ResourceModel> listEventDestinationsGivenConfigurationSet(@NonNull final String configurationSetName) {
-        final DescribeConfigurationSetRequest request = DescribeConfigurationSetRequest
-                .builder()
+        final DescribeConfigurationSetRequest request = DescribeConfigurationSetRequest.builder()
                 .configurationSetName(configurationSetName)
+                .configurationSetAttributeNames(ConfigurationSetAttribute.EVENT_DESTINATIONS)
                 .build();
         final DescribeConfigurationSetResponse response;
         try {

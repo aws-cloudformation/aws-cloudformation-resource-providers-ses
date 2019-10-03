@@ -1,9 +1,6 @@
 package com.amazonaws.ses.configurationseteventdestination;
 
-import software.amazon.awssdk.services.ses.model.CloudWatchDimensionConfiguration;
-
 import java.util.Collections;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class Translator {

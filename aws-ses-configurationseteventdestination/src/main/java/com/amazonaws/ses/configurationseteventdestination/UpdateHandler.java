@@ -1,6 +1,5 @@
 package com.amazonaws.ses.configurationseteventdestination;
 
-import com.amazonaws.cloudformation.exceptions.ResourceAlreadyExistsException;
 import com.amazonaws.cloudformation.exceptions.ResourceNotFoundException;
 import com.amazonaws.cloudformation.proxy.*;
 import software.amazon.awssdk.services.ses.SesClient;

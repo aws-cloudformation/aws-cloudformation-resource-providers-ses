@@ -1,10 +1,10 @@
 package com.amazonaws.ses.configurationseteventdestination;
 
-        import com.amazonaws.cloudformation.exceptions.ResourceNotFoundException;
-        import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
-        import com.amazonaws.cloudformation.proxy.Logger;
-        import com.amazonaws.cloudformation.proxy.ProgressEvent;
-        import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
+import com.amazonaws.cloudformation.exceptions.ResourceNotFoundException;
+import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
+import com.amazonaws.cloudformation.proxy.Logger;
+import com.amazonaws.cloudformation.proxy.ProgressEvent;
+import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
 
 public class ReadHandler extends BaseHandler<CallbackContext> {
 
