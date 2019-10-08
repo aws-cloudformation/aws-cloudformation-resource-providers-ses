@@ -8,15 +8,12 @@ import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
 
 public class ReadHandler extends BaseHandler<CallbackContext> {
 
-    private Logger logger;
-
     @Override
     public ProgressEvent<ResourceModel, CallbackContext> handleRequest(
             final AmazonWebServicesClientProxy proxy,
             final ResourceHandlerRequest<ResourceModel> request,
             final CallbackContext callbackContext,
             final Logger logger) {
-        this.logger = logger;
 
         final ResourceModel model = request.getDesiredResourceState();
         final String configurationSetName = model.getConfigurationSetName();

@@ -1,9 +1,20 @@
 package com.amazonaws.ses.configurationseteventdestination;
 
 import com.amazonaws.cloudformation.exceptions.ResourceNotFoundException;
-import com.amazonaws.cloudformation.proxy.*;
+import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
+import com.amazonaws.cloudformation.proxy.HandlerErrorCode;
+import com.amazonaws.cloudformation.proxy.Logger;
+import com.amazonaws.cloudformation.proxy.ProgressEvent;
+import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
+import lombok.NonNull;
 import software.amazon.awssdk.services.ses.SesClient;
-import software.amazon.awssdk.services.ses.model.*;
+import software.amazon.awssdk.services.ses.model.ConfigurationSetDoesNotExistException;
+import software.amazon.awssdk.services.ses.model.EventDestinationDoesNotExistException;
+import software.amazon.awssdk.services.ses.model.InvalidCloudWatchDestinationException;
+import software.amazon.awssdk.services.ses.model.InvalidFirehoseDestinationException;
+import software.amazon.awssdk.services.ses.model.InvalidSnsDestinationException;
+import software.amazon.awssdk.services.ses.model.LimitExceededException;
+import software.amazon.awssdk.services.ses.model.UpdateConfigurationSetEventDestinationRequest;
 
 public class UpdateHandler extends BaseHandler<CallbackContext> {
     private AmazonWebServicesClientProxy proxy;
@@ -22,52 +33,35 @@ public class UpdateHandler extends BaseHandler<CallbackContext> {
         this.logger = logger;
 
         if (callbackContext != null && callbackContext.getStabilization()) {
-            return stabilizeConfigurationSetEventDestination(callbackContext, request);
+            return ResourceStabilizer.createStabilization(proxy, request, callbackContext, logger);
         } else {
             return updateConfigurationSetEventDestination(request);
         }
     }
 
-    private ProgressEvent<ResourceModel, CallbackContext> updateConfigurationSetEventDestination(ResourceHandlerRequest<ResourceModel> request) {
+    private ProgressEvent<ResourceModel, CallbackContext> updateConfigurationSetEventDestination(@NonNull final ResourceHandlerRequest<ResourceModel> request) {
         final ResourceModel model = request.getDesiredResourceState();
         final String configurationSetName = model.getConfigurationSetName();
         final String eventDestinationName = model.getEventDestination().getName();
 
         try {
-            UpdateConfigurationSetEventDestinationRequest updateConfigurationSetEventDestinationRequest =
+            final UpdateConfigurationSetEventDestinationRequest updateConfigurationSetEventDestinationRequest =
                     UpdateConfigurationSetEventDestinationRequest.builder().configurationSetName(configurationSetName).eventDestination(Translator.translate(model.getEventDestination())).build();
             this.proxy.injectCredentialsAndInvokeV2(updateConfigurationSetEventDestinationRequest, this.client::updateConfigurationSetEventDestination);
-            logger.log(String.format("%s [%s] updated successfully",
-                    ResourceModel.TYPE_NAME, configurationSetName + ":" + eventDestinationName));
-        } catch (ConfigurationSetDoesNotExistException e) {
+            logger.log(String.format("%s [%s] Update initiated", ResourceModel.TYPE_NAME, configurationSetName + ":" + eventDestinationName));
+        } catch (final ConfigurationSetDoesNotExistException e) {
             throw new ResourceNotFoundException(ResourceModel.TYPE_NAME, configurationSetName);
-        } catch (EventDestinationDoesNotExistException e) {
+        } catch (final EventDestinationDoesNotExistException e) {
             throw new ResourceNotFoundException(ResourceModel.TYPE_NAME, eventDestinationName);
-        } catch (InvalidCloudWatchDestinationException | InvalidFirehoseDestinationException | InvalidSnsDestinationException | LimitExceededException e) {
+        } catch (final InvalidCloudWatchDestinationException | InvalidFirehoseDestinationException | InvalidSnsDestinationException | LimitExceededException e) {
             return ProgressEvent.defaultFailureHandler(e, HandlerErrorCode.InvalidRequest);
         }
-        CallbackContext stabilizationContext = CallbackContext.builder()
+        final CallbackContext stabilizationContext = CallbackContext.builder()
                 .stabilization(true)
                 .build();
         return ProgressEvent.defaultInProgressHandler(
                 stabilizationContext,
-                5,
-                model);
-    }
-
-    private ProgressEvent<ResourceModel, CallbackContext> stabilizeConfigurationSetEventDestination(CallbackContext callbackContext, ResourceHandlerRequest<ResourceModel> request) {
-        final ResourceModel model = request.getDesiredResourceState();
-        // read to ensure resource exists
-        try {
-            final ProgressEvent<ResourceModel, CallbackContext> readResult =
-                    new ReadHandler().handleRequest(proxy, request, null, this.logger);
-            return ProgressEvent.defaultSuccessHandler(readResult.getResourceModel());
-        } catch (final ResourceNotFoundException e) {
-            // resource not yet found, re-invoke
-        }
-        return ProgressEvent.defaultInProgressHandler(
-                callbackContext,
-                5,
+                Constants.CALLBACK_DELAY_SECONDS,
                 model);
     }
 }

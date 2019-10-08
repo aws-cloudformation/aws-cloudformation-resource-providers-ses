@@ -2,17 +2,27 @@ package com.amazonaws.ses.configurationseteventdestination;
 
 import com.amazonaws.cloudformation.exceptions.ResourceAlreadyExistsException;
 import com.amazonaws.cloudformation.exceptions.ResourceNotFoundException;
-import com.amazonaws.cloudformation.proxy.*;
+import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
+import com.amazonaws.cloudformation.proxy.HandlerErrorCode;
+import com.amazonaws.cloudformation.proxy.Logger;
+import com.amazonaws.cloudformation.proxy.ProgressEvent;
+import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
 import com.amazonaws.cloudformation.resource.IdentifierUtils;
 import com.amazonaws.util.StringUtils;
+import lombok.NonNull;
 import software.amazon.awssdk.services.ses.SesClient;
-import software.amazon.awssdk.services.ses.model.*;
+import software.amazon.awssdk.services.ses.model.ConfigurationSetDoesNotExistException;
+import software.amazon.awssdk.services.ses.model.CreateConfigurationSetEventDestinationRequest;
+import software.amazon.awssdk.services.ses.model.EventDestinationAlreadyExistsException;
+import software.amazon.awssdk.services.ses.model.InvalidCloudWatchDestinationException;
+import software.amazon.awssdk.services.ses.model.InvalidFirehoseDestinationException;
+import software.amazon.awssdk.services.ses.model.InvalidSnsDestinationException;
+import software.amazon.awssdk.services.ses.model.LimitExceededException;
 
 public class CreateHandler extends BaseHandler<CallbackContext> {
     private AmazonWebServicesClientProxy proxy;
     private SesClient client;
     private Logger logger;
-    public static final int MAX_CONFIGURATION_SET_EVENT_DESTINATION_NAME = 64;
 
     @Override
     public ProgressEvent<ResourceModel, CallbackContext> handleRequest(
@@ -26,13 +36,13 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         this.logger = logger;
 
         if (callbackContext != null && callbackContext.getStabilization()) {
-            return stabilizeConfigurationSetEventDestination(callbackContext, request);
+            return ResourceStabilizer.createStabilization(proxy, request, callbackContext, logger);
         } else {
             return createConfigurationSetEventDestination(request);
         }
     }
 
-    private ProgressEvent<ResourceModel, CallbackContext> createConfigurationSetEventDestination(ResourceHandlerRequest<ResourceModel> request) {
+    private ProgressEvent<ResourceModel, CallbackContext> createConfigurationSetEventDestination(@NonNull final ResourceHandlerRequest<ResourceModel> request) {
         final ResourceModel model = request.getDesiredResourceState();
         final String configurationSetName = model.getConfigurationSetName();
         final String eventDestinationName = model.getEventDestination().getName();
@@ -45,45 +55,28 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                     IdentifierUtils.generateResourceIdentifier(
                             request.getLogicalResourceIdentifier(),
                             request.getClientRequestToken(),
-                            MAX_CONFIGURATION_SET_EVENT_DESTINATION_NAME
+                            Constants.MAX_CONFIGURATION_SET_EVENT_DESTINATION_NAME
                     )
             );
         }
         try {
-            CreateConfigurationSetEventDestinationRequest createConfigurationSetEventDestinationRequest =
+            final CreateConfigurationSetEventDestinationRequest createConfigurationSetEventDestinationRequest =
                     CreateConfigurationSetEventDestinationRequest.builder().configurationSetName(configurationSetName).eventDestination(Translator.translate(model.getEventDestination())).build();
             this.proxy.injectCredentialsAndInvokeV2(createConfigurationSetEventDestinationRequest, this.client::createConfigurationSetEventDestination);
-            logger.log(String.format("%s [%s] created successfully",
-                    ResourceModel.TYPE_NAME, configurationSetName + ":" + eventDestinationName));
-        } catch (ConfigurationSetDoesNotExistException e) {
+            logger.log(String.format("%s [%s] Create initiated", ResourceModel.TYPE_NAME, configurationSetName + ":" + eventDestinationName));
+        } catch (final ConfigurationSetDoesNotExistException e) {
             throw new ResourceNotFoundException(ResourceModel.TYPE_NAME, configurationSetName);
-        } catch (EventDestinationAlreadyExistsException e) {
+        } catch (final EventDestinationAlreadyExistsException e) {
             throw new ResourceAlreadyExistsException(ResourceModel.TYPE_NAME, configurationSetName + ":" + eventDestinationName);
-        } catch (InvalidCloudWatchDestinationException | InvalidFirehoseDestinationException | InvalidSnsDestinationException | LimitExceededException e) {
+        } catch (final InvalidCloudWatchDestinationException | InvalidFirehoseDestinationException | InvalidSnsDestinationException | LimitExceededException e) {
             return ProgressEvent.defaultFailureHandler(e, HandlerErrorCode.InvalidRequest);
         }
-        CallbackContext stabilizationContext = CallbackContext.builder()
+        final CallbackContext stabilizationContext = CallbackContext.builder()
                 .stabilization(true)
                 .build();
         return ProgressEvent.defaultInProgressHandler(
                 stabilizationContext,
-                5,
-                model);
-    }
-
-    private ProgressEvent<ResourceModel, CallbackContext> stabilizeConfigurationSetEventDestination(CallbackContext callbackContext, ResourceHandlerRequest<ResourceModel> request) {
-        final ResourceModel model = request.getDesiredResourceState();
-        // read to ensure resource exists
-        try {
-            final ProgressEvent<ResourceModel, CallbackContext> readResult =
-                    new ReadHandler().handleRequest(proxy, request, null, this.logger);
-            return ProgressEvent.defaultSuccessHandler(readResult.getResourceModel());
-        } catch (final ResourceNotFoundException e) {
-            // resource not yet found, re-invoke
-        }
-        return ProgressEvent.defaultInProgressHandler(
-                callbackContext,
-                5,
+                Constants.CALLBACK_DELAY_SECONDS,
                 model);
     }
 }
