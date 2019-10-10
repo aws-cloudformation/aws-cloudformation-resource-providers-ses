@@ -27,16 +27,12 @@ public class UpdateHandler extends BaseHandler<CallbackContext> {
             final ResourceHandlerRequest<ResourceModel> request,
             final CallbackContext callbackContext,
             final Logger logger) {
-
         this.proxy = proxy;
         this.client = ClientBuilder.getClient();
         this.logger = logger;
 
-        if (callbackContext != null && callbackContext.getStabilization()) {
-            return ResourceStabilizer.createStabilization(proxy, request, callbackContext, logger);
-        } else {
-            return updateConfigurationSetEventDestination(request);
-        }
+        return updateConfigurationSetEventDestination(request);
+
     }
 
     private ProgressEvent<ResourceModel, CallbackContext> updateConfigurationSetEventDestination(@NonNull final ResourceHandlerRequest<ResourceModel> request) {
@@ -48,7 +44,7 @@ public class UpdateHandler extends BaseHandler<CallbackContext> {
             final UpdateConfigurationSetEventDestinationRequest updateConfigurationSetEventDestinationRequest =
                     UpdateConfigurationSetEventDestinationRequest.builder().configurationSetName(configurationSetName).eventDestination(Translator.translate(model.getEventDestination())).build();
             this.proxy.injectCredentialsAndInvokeV2(updateConfigurationSetEventDestinationRequest, this.client::updateConfigurationSetEventDestination);
-            logger.log(String.format("%s [%s] Update initiated", ResourceModel.TYPE_NAME, configurationSetName + ":" + eventDestinationName));
+            logger.log(String.format("%s [%s] Updated Successfully", ResourceModel.TYPE_NAME, configurationSetName + ":" + eventDestinationName));
         } catch (final ConfigurationSetDoesNotExistException e) {
             throw new ResourceNotFoundException(ResourceModel.TYPE_NAME, configurationSetName);
         } catch (final EventDestinationDoesNotExistException e) {
@@ -56,12 +52,6 @@ public class UpdateHandler extends BaseHandler<CallbackContext> {
         } catch (final InvalidCloudWatchDestinationException | InvalidFirehoseDestinationException | InvalidSnsDestinationException | LimitExceededException e) {
             return ProgressEvent.defaultFailureHandler(e, HandlerErrorCode.InvalidRequest);
         }
-        final CallbackContext stabilizationContext = CallbackContext.builder()
-                .stabilization(true)
-                .build();
-        return ProgressEvent.defaultInProgressHandler(
-                stabilizationContext,
-                Constants.CALLBACK_DELAY_SECONDS,
-                model);
+        return ProgressEvent.defaultSuccessHandler(model);
     }
 }

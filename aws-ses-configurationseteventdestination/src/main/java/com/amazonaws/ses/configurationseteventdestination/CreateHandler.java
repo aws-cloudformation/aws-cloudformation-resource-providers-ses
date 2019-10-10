@@ -34,12 +34,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         this.proxy = proxy;
         this.client = ClientBuilder.getClient();
         this.logger = logger;
-
-        if (callbackContext != null && callbackContext.getStabilization()) {
-            return ResourceStabilizer.createStabilization(proxy, request, callbackContext, logger);
-        } else {
-            return createConfigurationSetEventDestination(request);
-        }
+        return createConfigurationSetEventDestination(request);
     }
 
     private ProgressEvent<ResourceModel, CallbackContext> createConfigurationSetEventDestination(@NonNull final ResourceHandlerRequest<ResourceModel> request) {
@@ -63,7 +58,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
             final CreateConfigurationSetEventDestinationRequest createConfigurationSetEventDestinationRequest =
                     CreateConfigurationSetEventDestinationRequest.builder().configurationSetName(configurationSetName).eventDestination(Translator.translate(model.getEventDestination())).build();
             this.proxy.injectCredentialsAndInvokeV2(createConfigurationSetEventDestinationRequest, this.client::createConfigurationSetEventDestination);
-            logger.log(String.format("%s [%s] Create initiated", ResourceModel.TYPE_NAME, configurationSetName + ":" + eventDestinationName));
+            logger.log(String.format("%s [%s] Created Successfully", ResourceModel.TYPE_NAME, configurationSetName + ":" + eventDestinationName));
         } catch (final ConfigurationSetDoesNotExistException e) {
             throw new ResourceNotFoundException(ResourceModel.TYPE_NAME, configurationSetName);
         } catch (final EventDestinationAlreadyExistsException e) {
@@ -71,12 +66,6 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         } catch (final InvalidCloudWatchDestinationException | InvalidFirehoseDestinationException | InvalidSnsDestinationException | LimitExceededException e) {
             return ProgressEvent.defaultFailureHandler(e, HandlerErrorCode.InvalidRequest);
         }
-        final CallbackContext stabilizationContext = CallbackContext.builder()
-                .stabilization(true)
-                .build();
-        return ProgressEvent.defaultInProgressHandler(
-                stabilizationContext,
-                Constants.CALLBACK_DELAY_SECONDS,
-                model);
+        return ProgressEvent.defaultSuccessHandler(model);
     }
 }

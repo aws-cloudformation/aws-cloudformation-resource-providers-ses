@@ -25,12 +25,7 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
         this.proxy = proxy;
         this.client = ClientBuilder.getClient();
         this.logger = logger;
-
-        if (callbackContext != null && callbackContext.getStabilization()) {
-            return ResourceStabilizer.deleteStabilization(proxy, request, callbackContext, logger);
-        } else {
-            return deleteConfigurationSetEventDestination(request);
-        }
+        return deleteConfigurationSetEventDestination(request);
     }
 
     private ProgressEvent<ResourceModel, CallbackContext> deleteConfigurationSetEventDestination(@NonNull final ResourceHandlerRequest<ResourceModel> request) {
@@ -43,19 +38,12 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
                     .eventDestinationName(model.getEventDestination().getName())
                     .build();
             proxy.injectCredentialsAndInvokeV2(deleteConfigurationSetEventDestinationRequest, this.client::deleteConfigurationSetEventDestination);
-            logger.log(String.format("%s [%s] Delete initiated", ResourceModel.TYPE_NAME, configurationSetName + ":" + eventDestinationName));
+            logger.log(String.format("%s [%s] Deleted Successfully", ResourceModel.TYPE_NAME, configurationSetName + ":" + eventDestinationName));
         } catch (final ConfigurationSetDoesNotExistException e) {
             throw new ResourceNotFoundException(ResourceModel.TYPE_NAME, configurationSetName);
         } catch (final EventDestinationDoesNotExistException e) {
             throw new ResourceNotFoundException(ResourceModel.TYPE_NAME, eventDestinationName);
         }
-
-        final CallbackContext stabilizationContext = CallbackContext.builder()
-                .stabilization(true)
-                .build();
-        return ProgressEvent.defaultInProgressHandler(
-                stabilizationContext,
-                Constants.CALLBACK_DELAY_SECONDS,
-                model);
+        return ProgressEvent.defaultSuccessHandler(null);
     }
 }
