@@ -1,7 +1,6 @@
 package com.amazonaws.ses.receiptfilter;
 
 import com.amazonaws.cloudformation.exceptions.ResourceAlreadyExistsException;
-import com.amazonaws.cloudformation.exceptions.ResourceNotFoundException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.Logger;
 import com.amazonaws.cloudformation.proxy.ProgressEvent;
@@ -30,11 +29,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         this.client = ClientBuilder.getClient();
         this.logger = logger;
 
-        if (callbackContext != null && callbackContext.getStabilization()) {
-            return stabilizeReceiptFilter(callbackContext, request);
-        } else {
-            return createReceiptFilter(request);
-        }
+        return createReceiptFilter(request);
     }
 
     private ProgressEvent<ResourceModel, CallbackContext> createReceiptFilter(final @NonNull ResourceHandlerRequest<ResourceModel> request) {
@@ -63,29 +58,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         } catch (AlreadyExistsException e) {
             throw new ResourceAlreadyExistsException(ResourceModel.TYPE_NAME, receiptFilterName);
         }
-        CallbackContext stabilizationContext = CallbackContext.builder()
-                .stabilization(true)
-                .build();
-        return ProgressEvent.defaultInProgressHandler(
-                stabilizationContext,
-                5,
-                model);
-    }
+        return ProgressEvent.defaultSuccessHandler(model);
 
-    private ProgressEvent<ResourceModel, CallbackContext> stabilizeReceiptFilter(final @NonNull CallbackContext callbackContext,
-                                                                                 final @NonNull ResourceHandlerRequest<ResourceModel> request) {
-        final ResourceModel model = request.getDesiredResourceState();
-        // read to ensure resource exists
-        try {
-            final ProgressEvent<ResourceModel, CallbackContext> readResult =
-                    new ReadHandler().handleRequest(proxy, request, null, this.logger);
-            return ProgressEvent.defaultSuccessHandler(readResult.getResourceModel());
-        } catch (final ResourceNotFoundException e) {
-            // resource not yet found, re-invoke
-        }
-        return ProgressEvent.defaultInProgressHandler(
-                callbackContext,
-                5,
-                model);
     }
 }
