@@ -134,8 +134,7 @@
     "handlers": {
         "create": {
             "permissions": [
-                "ses:CreateConfigurationSetEventDestination",
-                "ses:DescribeConfigurationSet"
+                "ses:CreateConfigurationSetEventDestination"
             ]
         },
         "read": {
@@ -145,14 +144,12 @@
         },
         "update": {
             "permissions": [
-                "ses:UpdateConfigurationSetEventDestination",
-                "ses:DescribeConfigurationSet"
+                "ses:UpdateConfigurationSetEventDestination"
             ]
         },
         "delete": {
             "permissions": [
-                "ses:DeleteConfigurationSetEventDestination",
-                "ses:DescribeConfigurationSet"
+                "ses:DeleteConfigurationSetEventDestination"
             ]
         },
         "list": {
