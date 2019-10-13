@@ -42,3 +42,4 @@ phases:
       - mvn clean verify --no-transfer-progress
     finally:
       - cat "$CODEBUILD_SRC_DIR/aws-ses-configurationset/rpdk.log"
+      - cat "$CODEBUILD_SRC_DIR/aws-ses-receiptfilter/rpdk.log"
