@@ -32,7 +32,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         return createReceiptFilter(request);
     }
 
-    private ProgressEvent<ResourceModel, CallbackContext> createReceiptFilter(final @NonNull ResourceHandlerRequest<ResourceModel> request) {
+    private ProgressEvent<ResourceModel, CallbackContext> createReceiptFilter(final ResourceHandlerRequest<ResourceModel> request) {
         final ResourceModel model = request.getDesiredResourceState();
         // resource can auto-generate a name if not supplied by caller
         // this logic should move up into the CloudFormation engine, but

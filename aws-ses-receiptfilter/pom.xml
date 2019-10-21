@@ -167,6 +167,11 @@
                         <exclude>**/BaseHandler*</exclude>
                         <exclude>**/HandlerWrapper*</exclude>
                         <exclude>**/ResourceModel*</exclude>
+                        <exclude>**/Filter*</exclude>
+                        <exclude>**/IpFilter*</exclude>
+                        <exclude>**/CallbackContext*</exclude>
+                        <exclude>**/ClientBuilder*</exclude>
+                        <exclude>**/Configuration*</exclude>
                     </excludes>
                 </configuration>
                 <executions>
