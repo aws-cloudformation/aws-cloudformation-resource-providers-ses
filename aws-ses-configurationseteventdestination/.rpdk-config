@@ -1,0 +1,15 @@
+{
+    "typeName": "AWS::SES::ConfigurationSetEventDestination",
+    "language": "java",
+    "runtime": "java8",
+    "entrypoint": "com.amazonaws.ses.configurationseteventdestination.HandlerWrapper::handleRequest",
+    "testEntrypoint": "com.amazonaws.ses.configurationseteventdestination.HandlerWrapper::testEntrypoint",
+    "settings": {
+        "namespace": [
+            "com",
+            "amazonaws",
+            "ses",
+            "configurationseteventdestination"
+        ]
+    }
+}

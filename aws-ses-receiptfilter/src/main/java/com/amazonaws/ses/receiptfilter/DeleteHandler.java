@@ -25,7 +25,7 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
         return deleteReceiptFilter(request);
     }
 
-    private ProgressEvent<ResourceModel, CallbackContext> deleteReceiptFilter(final @NonNull ResourceHandlerRequest<ResourceModel> request) {
+    private ProgressEvent<ResourceModel, CallbackContext> deleteReceiptFilter(final ResourceHandlerRequest<ResourceModel> request) {
         final ResourceModel model = request.getDesiredResourceState();
         final String receiptFilterName = model.getFilter().getName();
 

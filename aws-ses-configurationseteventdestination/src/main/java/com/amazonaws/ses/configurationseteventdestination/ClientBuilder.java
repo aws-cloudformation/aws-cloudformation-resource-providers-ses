@@ -1,9 +1,10 @@
-package com.amazonaws.ses.receiptfilter;
+package com.amazonaws.ses.configurationseteventdestination;
 
 import software.amazon.awssdk.services.ses.SesClient;
 
 public class ClientBuilder {
     public static SesClient getClient() {
-        return SesClient.builder().build();
+        return SesClient.builder()
+                .build();
     }
 }
