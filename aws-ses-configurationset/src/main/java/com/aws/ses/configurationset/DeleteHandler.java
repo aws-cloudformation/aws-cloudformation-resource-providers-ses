@@ -48,9 +48,7 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
             logger.log(String.format("%s [%s] deleted successfully",
                 ResourceModel.TYPE_NAME, getPrimaryIdentifier(model).toString()));
         } catch (final ConfigurationSetDoesNotExistException e) {
-            logger.log(String.format("%s [%s] is already deleted",
-                ResourceModel.TYPE_NAME, getPrimaryIdentifier(model).toString()));
-            return ProgressEvent.defaultSuccessHandler(null);
+            throw new ResourceNotFoundException(ResourceModel.TYPE_NAME, model.getName());
         }
 
         CallbackContext stabilizationContext = CallbackContext.builder()
