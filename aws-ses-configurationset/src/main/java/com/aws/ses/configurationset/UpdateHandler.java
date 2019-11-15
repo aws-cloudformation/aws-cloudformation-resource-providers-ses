@@ -1,10 +1,11 @@
 package com.aws.ses.configurationset;
 
+import static com.aws.ses.configurationset.ResourceModelExtensions.getPrimaryIdentifier;
+
+import com.amazonaws.cloudformation.exceptions.CfnNotUpdatableException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
-import com.amazonaws.cloudformation.proxy.HandlerErrorCode;
 import com.amazonaws.cloudformation.proxy.Logger;
 import com.amazonaws.cloudformation.proxy.ProgressEvent;
-import com.amazonaws.cloudformation.proxy.OperationStatus;
 import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
 
 public class UpdateHandler extends BaseHandler<CallbackContext> {
@@ -15,9 +16,10 @@ public class UpdateHandler extends BaseHandler<CallbackContext> {
         final ResourceHandlerRequest<ResourceModel> request,
         final CallbackContext callbackContext,
         final Logger logger) {
-        return ProgressEvent.<ResourceModel, CallbackContext>builder()
-            .errorCode(HandlerErrorCode.NotUpdatable)
-            .status(OperationStatus.FAILED)
-            .build();
+
+        throw new CfnNotUpdatableException(
+                ResourceModel.TYPE_NAME,
+                getPrimaryIdentifier(request.getDesiredResourceState()).toString()
+        );
     }
 }

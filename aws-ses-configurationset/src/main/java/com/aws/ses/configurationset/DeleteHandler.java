@@ -1,8 +1,9 @@
 package com.aws.ses.configurationset;
 
-import com.amazonaws.cloudformation.exceptions.ResourceNotFoundException;
+import com.amazonaws.cloudformation.exceptions.CfnNotFoundException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.Logger;
+import com.amazonaws.cloudformation.proxy.OperationStatus;
 import com.amazonaws.cloudformation.proxy.ProgressEvent;
 import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
 import software.amazon.awssdk.services.ses.SesClient;
@@ -27,55 +28,32 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
         this.client = ClientBuilder.getClient();
         this.logger = logger;
 
-        if (callbackContext != null && callbackContext.getIsStabilization()) {
-            return stabilizeConfigurationSet(proxy, callbackContext, request);
-        } else {
-            return deleteConfigurationSet(proxy, request);
-        }
+        return deleteResource(request.getDesiredResourceState());
     }
 
-    private ProgressEvent<ResourceModel, CallbackContext> deleteConfigurationSet(
-        final AmazonWebServicesClientProxy proxy,
-        final ResourceHandlerRequest<ResourceModel> request) {
-
-        final ResourceModel model = request.getDesiredResourceState();
-
-        try {
-            final DeleteConfigurationSetRequest deleteConfigurationSetRequest = DeleteConfigurationSetRequest.builder()
-                .configurationSetName(model.getName())
+    private ProgressEvent<ResourceModel, CallbackContext> deleteResource(ResourceModel model) {
+        deleteConfigurationSet(model);
+        return ProgressEvent.<ResourceModel, CallbackContext>builder()
+                .resourceModel(model)
+                .status(OperationStatus.SUCCESS)
                 .build();
-            proxy.injectCredentialsAndInvokeV2(deleteConfigurationSetRequest, this.client::deleteConfigurationSet);
-            logger.log(String.format("%s [%s] deleted successfully",
-                ResourceModel.TYPE_NAME, getPrimaryIdentifier(model).toString()));
-        } catch (final ConfigurationSetDoesNotExistException e) {
-            throw new ResourceNotFoundException(ResourceModel.TYPE_NAME, model.getName());
-        }
-
-        CallbackContext stabilizationContext = CallbackContext.builder()
-            .isStabilization(true)
-            .build();
-        return ProgressEvent.defaultInProgressHandler(
-            stabilizationContext,
-            5,
-            model);
     }
 
-    private ProgressEvent<ResourceModel, CallbackContext> stabilizeConfigurationSet(
-        final AmazonWebServicesClientProxy proxy,
-        final CallbackContext callbackContext,
-        final ResourceHandlerRequest<ResourceModel> request) {
-        ResourceModel model = request.getDesiredResourceState();
-
-        // read to ensure resource no longer exists
+    private void deleteConfigurationSet(final ResourceModel model) {
+        final DeleteConfigurationSetRequest deleteConfigurationSetRequest =
+                DeleteConfigurationSetRequest.builder()
+                        .configurationSetName(model.getName())
+                .build();
         try {
-            new ReadHandler().handleRequest(proxy, request, null, this.logger);
-        } catch (final ResourceNotFoundException e) {
-            return ProgressEvent.defaultSuccessHandler(null);
+            proxy.injectCredentialsAndInvokeV2(deleteConfigurationSetRequest,
+                    client::deleteConfigurationSet);
+            logger.log(String.format("%s [%s] deleted successfully",
+                    ResourceModel.TYPE_NAME, getPrimaryIdentifier(model).toString()));
+        } catch (ConfigurationSetDoesNotExistException e) {
+            throw new CfnNotFoundException(ResourceModel.TYPE_NAME, getPrimaryIdentifier(model).toString());
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
-
-        return ProgressEvent.defaultInProgressHandler(
-            callbackContext,
-            5,
-            model);
     }
+
 }

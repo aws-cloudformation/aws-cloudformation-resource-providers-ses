@@ -1,5 +1,6 @@
 package com.aws.ses.configurationset;
 
+import com.amazonaws.cloudformation.exceptions.CfnNotFoundException;
 import com.amazonaws.cloudformation.exceptions.ResourceNotFoundException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.Logger;
@@ -23,7 +24,7 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
         final CallbackContext callbackContext,
         final Logger logger) {
         this.proxy = proxy;
-        this.client = SesClient.builder().build();
+        this.client = ClientBuilder.getClient();
 
         final ResourceModel model = describeConfigurationSet(request.getDesiredResourceState().getName());
 
@@ -34,20 +35,19 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
     }
 
     private ResourceModel describeConfigurationSet(final String configurationSetName) {
-        final DescribeConfigurationSetRequest request = DescribeConfigurationSetRequest
-            .builder()
-            .configurationSetName(configurationSetName)
-            .build();
+        final DescribeConfigurationSetRequest request =
+                DescribeConfigurationSetRequest.builder()
+                        .configurationSetName(configurationSetName)
+                        .build();
 
-        final DescribeConfigurationSetResponse response;
         try {
-            response = this.proxy.injectCredentialsAndInvokeV2(request, this.client::describeConfigurationSet);
+            final DescribeConfigurationSetResponse response =
+                    proxy.injectCredentialsAndInvokeV2(request, client::describeConfigurationSet);
+            return ResourceModel.builder()
+                    .name(response.configurationSet().name())
+                    .build();
         } catch (final ConfigurationSetDoesNotExistException e) {
-            throw new ResourceNotFoundException(ResourceModel.TYPE_NAME, configurationSetName);
+            throw new CfnNotFoundException(ResourceModel.TYPE_NAME, configurationSetName);
         }
-
-        return ResourceModel.builder()
-            .name(response.configurationSet().name())
-            .build();
     }
 }

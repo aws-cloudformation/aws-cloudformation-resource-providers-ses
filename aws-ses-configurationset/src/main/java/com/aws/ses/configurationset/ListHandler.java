@@ -26,7 +26,14 @@ public class ListHandler extends BaseHandler<CallbackContext> {
         this.proxy = proxy;
         this.client = ClientBuilder.getClient();
 
-        final List<ResourceModel> models = listConfigurationSets();
+        final List<ResourceModel> models = new ArrayList<>();
+        final ListConfigurationSetsResponse listConfigurationSetsResponse =
+                listNamedQueries(request.getNextToken());
+        listConfigurationSetsResponse.configurationSets().forEach(c ->
+                models.add(ResourceModel.builder()
+                        .name(c.name())
+                        .build())
+        );
 
         return ProgressEvent.<ResourceModel, CallbackContext>builder()
             .resourceModels(models)
@@ -34,22 +41,19 @@ public class ListHandler extends BaseHandler<CallbackContext> {
             .build();
     }
 
-    private List<ResourceModel> listConfigurationSets() {
-        final ListConfigurationSetsRequest request = ListConfigurationSetsRequest.builder()
-            .maxItems(50)
-            .build();
-
-        ListConfigurationSetsResponse response =
-            this.proxy.injectCredentialsAndInvokeV2(request, this.client::listConfigurationSets);
-
-        List<ResourceModel> models = new ArrayList<>();
-        response.configurationSets().forEach(c ->{
-            ResourceModel model = ResourceModel.builder()
-                .name(c.name())
-                .build();
-            models.add(model);
-        });
-
-        return models;
+    private ListConfigurationSetsResponse listNamedQueries(final String nextToken) {
+        final ListConfigurationSetsRequest listConfigurationSetsRequest =
+                ListConfigurationSetsRequest.builder()
+                        .nextToken(nextToken)
+                        .maxItems(50)
+                        .build();
+        try {
+            return proxy.injectCredentialsAndInvokeV2(
+                    listConfigurationSetsRequest,
+                    client::listConfigurationSets);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
     }
+
 }

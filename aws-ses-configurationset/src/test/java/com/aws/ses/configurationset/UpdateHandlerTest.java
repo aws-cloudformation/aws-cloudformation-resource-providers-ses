@@ -1,22 +1,18 @@
 package com.aws.ses.configurationset;
 
+import com.amazonaws.cloudformation.exceptions.CfnNotUpdatableException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
-import com.amazonaws.cloudformation.proxy.HandlerErrorCode;
 import com.amazonaws.cloudformation.proxy.Logger;
-import com.amazonaws.cloudformation.proxy.OperationStatus;
-import com.amazonaws.cloudformation.proxy.ProgressEvent;
 import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
-public class UpdateHandlerTest {
+class UpdateHandlerTest {
 
     @Mock
     private AmazonWebServicesClientProxy proxy;
@@ -24,31 +20,13 @@ public class UpdateHandlerTest {
     @Mock
     private Logger logger;
 
-    @BeforeEach
-    public void setup() {
-        proxy = mock(AmazonWebServicesClientProxy.class);
-        logger = mock(Logger.class);
-    }
-
     @Test
-    public void handleRequest_NotUpdatable() {
-        final UpdateHandler handler = new UpdateHandler();
-
-        final ResourceModel model = ResourceModel.builder().build();
-
+    void handleRequest_NotUpdatable() {
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-            .desiredResourceState(model)
-            .build();
+                .desiredResourceState(ResourceModel.builder().build())
+                .build();
 
-        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, null, logger);
-
-        assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.FAILED);
-        assertThat(response.getCallbackContext()).isNull();
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response.getResourceModel()).isNull();
-        assertThat(response.getResourceModels()).isNull();
-        assertThat(response.getMessage()).isNull();
-        assertThat(response.getErrorCode()).isEqualTo(HandlerErrorCode.NotUpdatable);
+        assertThrows(CfnNotUpdatableException.class, () ->
+                new UpdateHandler().handleRequest(proxy, request, null, logger));
     }
 }
