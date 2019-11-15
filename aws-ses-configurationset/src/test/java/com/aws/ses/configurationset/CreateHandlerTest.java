@@ -1,6 +1,7 @@
 package com.aws.ses.configurationset;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.cloudformation.exceptions.CfnAlreadyExistsException;
 import com.amazonaws.cloudformation.exceptions.ResourceAlreadyExistsException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.Logger;
@@ -223,7 +224,7 @@ public class CreateHandlerTest {
             .desiredResourceState(model)
             .build();
 
-        assertThrows(ResourceAlreadyExistsException.class, () -> {
+        assertThrows(CfnAlreadyExistsException.class, () -> {
             handler.handleRequest(proxy, request, null, logger);
         });
     }

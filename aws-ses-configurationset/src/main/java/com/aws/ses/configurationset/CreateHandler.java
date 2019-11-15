@@ -1,5 +1,8 @@
 package com.aws.ses.configurationset;
 
+import com.amazonaws.cloudformation.exceptions.CfnAlreadyExistsException;
+import com.amazonaws.cloudformation.exceptions.CfnInvalidRequestException;
+import com.amazonaws.cloudformation.exceptions.CfnServiceLimitExceededException;
 import com.amazonaws.cloudformation.exceptions.ResourceAlreadyExistsException;
 import com.amazonaws.cloudformation.exceptions.ResourceNotFoundException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
@@ -13,6 +16,8 @@ import software.amazon.awssdk.services.ses.model.ConfigurationSet;
 import software.amazon.awssdk.services.ses.model.ConfigurationSetAlreadyExistsException;
 import software.amazon.awssdk.services.ses.model.ConfigurationSetDoesNotExistException;
 import software.amazon.awssdk.services.ses.model.CreateConfigurationSetRequest;
+import software.amazon.awssdk.services.ses.model.InvalidConfigurationSetException;
+import software.amazon.awssdk.services.ses.model.LimitExceededException;
 
 import static com.aws.ses.configurationset.ResourceModelExtensions.getPrimaryIdentifier;
 
@@ -68,19 +73,22 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
             // no existing resource, creation can proceed
         }
 
-        try {
-            final CreateConfigurationSetRequest createConfigurationSetRequest =
+        final CreateConfigurationSetRequest createConfigurationSetRequest =
                 CreateConfigurationSetRequest.builder()
-                    .configurationSet(ConfigurationSet.builder()
-                        .name(model.getName())
-                        .build())
-                    .build();
+                        .configurationSet(ConfigurationSet.builder()
+                                .name(model.getName())
+                                .build())
+                        .build();
+        try {
             proxy.injectCredentialsAndInvokeV2(createConfigurationSetRequest, this.client::createConfigurationSet);
             logger.log(String.format("%s [%s] created successfully",
                 ResourceModel.TYPE_NAME, getPrimaryIdentifier(model).toString()));
-        } catch (final ConfigurationSetAlreadyExistsException e) {
-            // failing here would suggest a conflicting operation was performed out of band
-            throw new ResourceAlreadyExistsException(ResourceModel.TYPE_NAME, model.getName());
+        } catch (ConfigurationSetAlreadyExistsException e) {
+            throw new CfnAlreadyExistsException(ResourceModel.TYPE_NAME, getPrimaryIdentifier(model).toString());
+        } catch (InvalidConfigurationSetException e) {
+            throw new CfnInvalidRequestException(createConfigurationSetRequest.toString(), e);
+        } catch (LimitExceededException e) {
+            throw new CfnServiceLimitExceededException(ResourceModel.TYPE_NAME, e.toString());
         }
 
         CallbackContext stabilizationContext = CallbackContext.builder()
