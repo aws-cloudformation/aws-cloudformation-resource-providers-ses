@@ -1,6 +1,6 @@
 package com.aws.ses.configurationset;
 
-import com.amazonaws.cloudformation.exceptions.ResourceNotFoundException;
+import com.amazonaws.cloudformation.exceptions.CfnNotFoundException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.Logger;
 import com.amazonaws.cloudformation.proxy.ProgressEvent;
@@ -48,7 +48,7 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
             logger.log(String.format("%s [%s] deleted successfully",
                 ResourceModel.TYPE_NAME, getPrimaryIdentifier(model).toString()));
         } catch (final ConfigurationSetDoesNotExistException e) {
-            throw new ResourceNotFoundException(ResourceModel.TYPE_NAME, model.getName());
+            throw new CfnNotFoundException(ResourceModel.TYPE_NAME, model.getName());
         }
 
         CallbackContext stabilizationContext = CallbackContext.builder()
@@ -69,7 +69,7 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
         // read to ensure resource no longer exists
         try {
             new ReadHandler().handleRequest(proxy, request, null, this.logger);
-        } catch (final ResourceNotFoundException e) {
+        } catch (final CfnNotFoundException e) {
             return ProgressEvent.defaultSuccessHandler(null);
         }
 

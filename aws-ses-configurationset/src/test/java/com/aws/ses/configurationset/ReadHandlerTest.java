@@ -1,5 +1,6 @@
 package com.aws.ses.configurationset;
 
+import com.amazonaws.cloudformation.exceptions.CfnNotFoundException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.Logger;
 import com.amazonaws.cloudformation.proxy.OperationStatus;
@@ -92,7 +93,7 @@ public class ReadHandlerTest {
             .desiredResourceState(model)
             .build();
 
-        assertThrows(com.amazonaws.cloudformation.exceptions.ResourceNotFoundException.class, () -> {
+        assertThrows(CfnNotFoundException.class, () -> {
             handler.handleRequest(proxy, request, null, logger);
         });
     }

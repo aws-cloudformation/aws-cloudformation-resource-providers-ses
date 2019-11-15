@@ -2,9 +2,8 @@ package com.aws.ses.configurationset;
 
 import com.amazonaws.cloudformation.exceptions.CfnAlreadyExistsException;
 import com.amazonaws.cloudformation.exceptions.CfnInvalidRequestException;
+import com.amazonaws.cloudformation.exceptions.CfnNotFoundException;
 import com.amazonaws.cloudformation.exceptions.CfnServiceLimitExceededException;
-import com.amazonaws.cloudformation.exceptions.ResourceAlreadyExistsException;
-import com.amazonaws.cloudformation.exceptions.ResourceNotFoundException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.Logger;
 import com.amazonaws.cloudformation.proxy.ProgressEvent;
@@ -68,17 +67,17 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         // pre-creation read to ensure no existing resource exists
         try {
             new ReadHandler().handleRequest(proxy, request, null, this.logger);
-            throw new ResourceAlreadyExistsException(ResourceModel.TYPE_NAME, model.getName());
-        } catch (final ResourceNotFoundException e) {
+            throw new CfnAlreadyExistsException(ResourceModel.TYPE_NAME, model.getName());
+        } catch (final CfnNotFoundException e) {
             // no existing resource, creation can proceed
         }
 
         final CreateConfigurationSetRequest createConfigurationSetRequest =
                 CreateConfigurationSetRequest.builder()
-                        .configurationSet(ConfigurationSet.builder()
-                                .name(model.getName())
-                                .build())
-                        .build();
+                    .configurationSet(ConfigurationSet.builder()
+                        .name(model.getName())
+                        .build())
+                    .build();
         try {
             proxy.injectCredentialsAndInvokeV2(createConfigurationSetRequest, this.client::createConfigurationSet);
             logger.log(String.format("%s [%s] created successfully",
