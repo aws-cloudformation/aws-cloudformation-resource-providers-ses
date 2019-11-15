@@ -1,14 +1,14 @@
-package com.aws.ses.configurationset;
+package software.amazon.ses.configurationset;
 
-import com.amazonaws.cloudformation.exceptions.CfnAlreadyExistsException;
-import com.amazonaws.cloudformation.exceptions.CfnInvalidRequestException;
-import com.amazonaws.cloudformation.exceptions.CfnNotFoundException;
-import com.amazonaws.cloudformation.exceptions.CfnServiceLimitExceededException;
-import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
-import com.amazonaws.cloudformation.proxy.Logger;
-import com.amazonaws.cloudformation.proxy.ProgressEvent;
-import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
-import com.amazonaws.cloudformation.resource.IdentifierUtils;
+import software.amazon.cloudformation.exceptions.CfnAlreadyExistsException;
+import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
+import software.amazon.cloudformation.exceptions.CfnNotFoundException;
+import software.amazon.cloudformation.exceptions.CfnServiceLimitExceededException;
+import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.Logger;
+import software.amazon.cloudformation.proxy.ProgressEvent;
+import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
+import software.amazon.cloudformation.resource.IdentifierUtils;
 import com.amazonaws.util.StringUtils;
 import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.ConfigurationSet;
@@ -18,7 +18,7 @@ import software.amazon.awssdk.services.ses.model.CreateConfigurationSetRequest;
 import software.amazon.awssdk.services.ses.model.InvalidConfigurationSetException;
 import software.amazon.awssdk.services.ses.model.LimitExceededException;
 
-import static com.aws.ses.configurationset.ResourceModelExtensions.getPrimaryIdentifier;
+import static software.amazon.ses.configurationset.ResourceModelExtensions.getPrimaryIdentifier;
 
 public class CreateHandler extends BaseHandler<CallbackContext> {
 

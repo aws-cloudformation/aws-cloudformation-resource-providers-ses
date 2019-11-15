@@ -1,10 +1,10 @@
-package com.aws.ses.configurationset;
+package software.amazon.ses.configurationset;
 
-import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
-import com.amazonaws.cloudformation.proxy.Logger;
-import com.amazonaws.cloudformation.proxy.OperationStatus;
-import com.amazonaws.cloudformation.proxy.ProgressEvent;
-import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
+import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.Logger;
+import software.amazon.cloudformation.proxy.OperationStatus;
+import software.amazon.cloudformation.proxy.ProgressEvent;
+import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.ListConfigurationSetsRequest;
 import software.amazon.awssdk.services.ses.model.ListConfigurationSetsResponse;

@@ -1,15 +1,15 @@
-package com.aws.ses.configurationset;
+package software.amazon.ses.configurationset;
 
-import com.amazonaws.cloudformation.exceptions.CfnNotFoundException;
-import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
-import com.amazonaws.cloudformation.proxy.Logger;
-import com.amazonaws.cloudformation.proxy.ProgressEvent;
-import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
+import software.amazon.cloudformation.exceptions.CfnNotFoundException;
+import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.Logger;
+import software.amazon.cloudformation.proxy.ProgressEvent;
+import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.ConfigurationSetDoesNotExistException;
 import software.amazon.awssdk.services.ses.model.DeleteConfigurationSetRequest;
 
-import static com.aws.ses.configurationset.ResourceModelExtensions.getPrimaryIdentifier;
+import static software.amazon.ses.configurationset.ResourceModelExtensions.getPrimaryIdentifier;
 
 public class DeleteHandler extends BaseHandler<CallbackContext> {
 

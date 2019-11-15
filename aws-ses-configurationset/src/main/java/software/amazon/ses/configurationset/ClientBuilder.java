@@ -1,4 +1,4 @@
-package com.aws.ses.configurationset;
+package software.amazon.ses.configurationset;
 
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.core.retry.RetryPolicy;

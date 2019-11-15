@@ -1,10 +1,10 @@
-package com.aws.ses.configurationset;
+package software.amazon.ses.configurationset;
 
-import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
-import com.amazonaws.cloudformation.proxy.Logger;
-import com.amazonaws.cloudformation.proxy.OperationStatus;
-import com.amazonaws.cloudformation.proxy.ProgressEvent;
-import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
+import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.Logger;
+import software.amazon.cloudformation.proxy.OperationStatus;
+import software.amazon.cloudformation.proxy.ProgressEvent;
+import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,10 +17,10 @@ import software.amazon.awssdk.services.ses.model.ListConfigurationSetsResponse;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.aws.ses.configurationset.Matchers.assertThatModelsAreEqual;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static software.amazon.ses.configurationset.Matchers.assertThatModelsAreEqual;
 
 @ExtendWith(MockitoExtension.class)
 public class ListHandlerTest {
