@@ -1,13 +1,12 @@
 package com.aws.ses.configurationset;
 
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.cloudformation.exceptions.ResourceAlreadyExistsException;
+import com.amazonaws.cloudformation.exceptions.CfnAlreadyExistsException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.Logger;
 import com.amazonaws.cloudformation.proxy.OperationStatus;
 import com.amazonaws.cloudformation.proxy.ProgressEvent;
 import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
@@ -27,7 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 public class CreateHandlerTest {
@@ -37,12 +35,6 @@ public class CreateHandlerTest {
 
     @Mock
     private Logger logger;
-
-    @BeforeEach
-    public void setup() {
-        proxy = mock(AmazonWebServicesClientProxy.class);
-        logger = mock(Logger.class);
-    }
 
     @Test
     public void handleRequest_SimpleSuccess() {
@@ -197,7 +189,7 @@ public class CreateHandlerTest {
             .desiredResourceState(model)
             .build();
 
-        assertThrows(ResourceAlreadyExistsException.class, () -> {
+        assertThrows(CfnAlreadyExistsException.class, () -> {
             handler.handleRequest(proxy, request, null, logger);
         });
     }
@@ -223,7 +215,7 @@ public class CreateHandlerTest {
             .desiredResourceState(model)
             .build();
 
-        assertThrows(ResourceAlreadyExistsException.class, () -> {
+        assertThrows(CfnAlreadyExistsException.class, () -> {
             handler.handleRequest(proxy, request, null, logger);
         });
     }

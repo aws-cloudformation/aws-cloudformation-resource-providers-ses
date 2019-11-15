@@ -1,6 +1,6 @@
 package com.aws.ses.configurationset;
 
-import com.amazonaws.cloudformation.exceptions.ResourceNotFoundException;
+import com.amazonaws.cloudformation.exceptions.CfnNotFoundException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.Logger;
 import com.amazonaws.cloudformation.proxy.OperationStatus;
@@ -23,7 +23,7 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
         final CallbackContext callbackContext,
         final Logger logger) {
         this.proxy = proxy;
-        this.client = SesClient.builder().build();
+        this.client = ClientBuilder.getClient();
 
         final ResourceModel model = describeConfigurationSet(request.getDesiredResourceState().getName());
 
@@ -43,7 +43,7 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
         try {
             response = this.proxy.injectCredentialsAndInvokeV2(request, this.client::describeConfigurationSet);
         } catch (final ConfigurationSetDoesNotExistException e) {
-            throw new ResourceNotFoundException(ResourceModel.TYPE_NAME, configurationSetName);
+            throw new CfnNotFoundException(ResourceModel.TYPE_NAME, configurationSetName);
         }
 
         return ResourceModel.builder()
