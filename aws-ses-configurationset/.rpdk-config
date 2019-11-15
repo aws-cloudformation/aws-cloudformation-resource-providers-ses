@@ -2,12 +2,12 @@
     "typeName": "AWS::SES::ConfigurationSet",
     "language": "java",
     "runtime": "java8",
-    "entrypoint": "com.aws.ses.configurationset.HandlerWrapper::handleRequest",
-    "testEntrypoint": "com.aws.ses.configurationset.HandlerWrapper::testEntrypoint",
+    "entrypoint": "software.amazon.ses.configurationset.HandlerWrapper::handleRequest",
+    "testEntrypoint": "software.amazon.ses.configurationset.HandlerWrapper::testEntrypoint",
     "settings": {
         "namespace": [
-            "com",
-            "aws",
+            "software",
+            "amazon",
             "ses",
             "configurationset"
         ]

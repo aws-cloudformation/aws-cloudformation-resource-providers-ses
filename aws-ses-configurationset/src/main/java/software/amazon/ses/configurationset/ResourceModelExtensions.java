@@ -1,4 +1,4 @@
-package com.aws.ses.configurationset;
+package software.amazon.ses.configurationset;
 
 import org.json.JSONObject;
 
