@@ -13,69 +13,26 @@ import static software.amazon.ses.configurationset.ResourceModelExtensions.getPr
 
 public class DeleteHandler extends BaseHandler<CallbackContext> {
 
-    private AmazonWebServicesClientProxy proxy;
-    private SesClient client;
-    private Logger logger;
-
     @Override
     public ProgressEvent<ResourceModel, CallbackContext> handleRequest(
         final AmazonWebServicesClientProxy proxy,
         final ResourceHandlerRequest<ResourceModel> request,
         final CallbackContext callbackContext,
         final Logger logger) {
-        this.proxy = proxy;
-        this.client = ClientBuilder.getClient();
-        this.logger = logger;
-
-        if (callbackContext != null && callbackContext.getIsStabilization()) {
-            return stabilizeConfigurationSet(proxy, callbackContext, request);
-        } else {
-            return deleteConfigurationSet(proxy, request);
-        }
-    }
-
-    private ProgressEvent<ResourceModel, CallbackContext> deleteConfigurationSet(
-        final AmazonWebServicesClientProxy proxy,
-        final ResourceHandlerRequest<ResourceModel> request) {
-
+        final SesClient client = ClientBuilder.getClient();
         final ResourceModel model = request.getDesiredResourceState();
 
         try {
             final DeleteConfigurationSetRequest deleteConfigurationSetRequest = DeleteConfigurationSetRequest.builder()
                 .configurationSetName(model.getName())
                 .build();
-            proxy.injectCredentialsAndInvokeV2(deleteConfigurationSetRequest, this.client::deleteConfigurationSet);
+            proxy.injectCredentialsAndInvokeV2(deleteConfigurationSetRequest, client::deleteConfigurationSet);
             logger.log(String.format("%s [%s] deleted successfully",
                 ResourceModel.TYPE_NAME, getPrimaryIdentifier(model).toString()));
         } catch (final ConfigurationSetDoesNotExistException e) {
             throw new CfnNotFoundException(ResourceModel.TYPE_NAME, model.getName());
         }
 
-        CallbackContext stabilizationContext = CallbackContext.builder()
-            .isStabilization(true)
-            .build();
-        return ProgressEvent.defaultInProgressHandler(
-            stabilizationContext,
-            5,
-            model);
-    }
-
-    private ProgressEvent<ResourceModel, CallbackContext> stabilizeConfigurationSet(
-        final AmazonWebServicesClientProxy proxy,
-        final CallbackContext callbackContext,
-        final ResourceHandlerRequest<ResourceModel> request) {
-        ResourceModel model = request.getDesiredResourceState();
-
-        // read to ensure resource no longer exists
-        try {
-            new ReadHandler().handleRequest(proxy, request, null, this.logger);
-        } catch (final CfnNotFoundException e) {
-            return ProgressEvent.defaultSuccessHandler(null);
-        }
-
-        return ProgressEvent.defaultInProgressHandler(
-            callbackContext,
-            5,
-            model);
+        return ProgressEvent.defaultSuccessHandler(null);
     }
 }

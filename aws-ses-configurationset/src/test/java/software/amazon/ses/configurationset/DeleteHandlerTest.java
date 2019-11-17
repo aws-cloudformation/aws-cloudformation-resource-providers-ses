@@ -62,11 +62,9 @@ public class DeleteHandlerTest {
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, null, logger);
 
         assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.IN_PROGRESS);
-        assertThat(response.getCallbackContext()).isNotNull();
-        assertThat(response.getCallbackContext().getIsStabilization()).isTrue();
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(5);
-        assertThat(response.getResourceModel()).isEqualTo(model);
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackContext()).isNull();
+        assertThat(response.getResourceModel()).isNull();
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
@@ -120,82 +118,6 @@ public class DeleteHandlerTest {
         assertThrows(AmazonServiceException.class, () -> {
             handler.handleRequest(proxy, request, null, logger);
         });
-    }
-
-    @Test
-    public void handleRequest_Stabilize() {
-        final DeleteHandler handler = new DeleteHandler();
-
-        final CallbackContext callbackContext = CallbackContext.builder()
-            .isStabilization(true)
-            .build();
-
-        doThrow(ConfigurationSetDoesNotExistException.class)
-            .when(proxy)
-            .injectCredentialsAndInvokeV2(
-                ArgumentMatchers.any(),
-                ArgumentMatchers.any()
-            );
-
-        final ResourceModel model = ResourceModel.builder()
-            .name("test-set")
-            .build();
-
-        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-            .desiredResourceState(model)
-            .build();
-
-        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, callbackContext, logger);
-
-        assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
-        assertThat(response.getCallbackContext()).isNull();
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response.getResourceModel()).isNull();
-        assertThat(response.getResourceModels()).isNull();
-        assertThat(response.getMessage()).isNull();
-        assertThat(response.getErrorCode()).isNull();
-    }
-
-    @Test
-    public void handleRequest_StabilizeAgain() {
-        final DeleteHandler handler = new DeleteHandler();
-
-        final CallbackContext callbackContext = CallbackContext.builder()
-            .isStabilization(true)
-            .build();
-
-        final ConfigurationSet set = ConfigurationSet.builder().name("test-set").build();
-        final DescribeConfigurationSetResponse describeResponse = DescribeConfigurationSetResponse.builder()
-            .configurationSet(set)
-            .build();
-
-        // stabilize check finds set still not deleted, so retries
-        doReturn(describeResponse)
-            .when(proxy)
-            .injectCredentialsAndInvokeV2(
-                ArgumentMatchers.any(),
-                ArgumentMatchers.any()
-            );
-
-        final ResourceModel model = ResourceModel.builder()
-            .name("test-set")
-            .build();
-
-        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-            .desiredResourceState(model)
-            .build();
-
-        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, callbackContext, logger);
-
-        assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.IN_PROGRESS);
-        assertThat(response.getCallbackContext()).isEqualTo(callbackContext);
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(5);
-        assertThat(response.getResourceModel()).isEqualTo(model);
-        assertThat(response.getResourceModels()).isNull();
-        assertThat(response.getMessage()).isNull();
-        assertThat(response.getErrorCode()).isNull();
     }
 
     @Test

@@ -63,10 +63,8 @@ public class CreateHandlerTest {
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, null, logger);
 
         assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.IN_PROGRESS);
-        assertThat(response.getCallbackContext()).isNotNull();
-        assertThat(response.getCallbackContext().getIsStabilization()).isTrue();
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(5);
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackContext()).isNull();
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getResourceModel()).isEqualTo(model);
         assertThat(response.getMessage()).isNull();
@@ -123,46 +121,6 @@ public class CreateHandlerTest {
         assertThrows(AmazonServiceException.class, () -> {
             handler.handleRequest(proxy, request, null, logger);
         });
-    }
-
-    @Test
-    public void handleRequest_Stabilize() {
-        final CreateHandler handler = new CreateHandler();
-
-        final CallbackContext callbackContext = CallbackContext.builder()
-            .isStabilization(true)
-            .build();
-
-        final ConfigurationSet set = ConfigurationSet.builder().name("test-set").build();
-        final DescribeConfigurationSetResponse describeResponse = DescribeConfigurationSetResponse.builder()
-            .configurationSet(set)
-            .build();
-
-        doReturn(describeResponse)
-            .when(proxy)
-            .injectCredentialsAndInvokeV2(
-                ArgumentMatchers.any(),
-                ArgumentMatchers.any()
-            );
-
-        final ResourceModel model = ResourceModel.builder()
-            .name("test-set")
-            .build();
-
-        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-            .desiredResourceState(model)
-            .build();
-
-        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, callbackContext, logger);
-
-        assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
-        assertThat(response.getCallbackContext()).isNull();
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response.getResourceModels()).isNull();
-        assertThatModelsAreEqual(response.getResourceModel(), set);
-        assertThat(response.getMessage()).isNull();
-        assertThat(response.getErrorCode()).isNull();
     }
 
     @Test
@@ -248,10 +206,8 @@ public class CreateHandlerTest {
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, null, logger);
 
         assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.IN_PROGRESS);
-        assertThat(response.getCallbackContext()).isNotNull();
-        assertThat(response.getCallbackContext().getIsStabilization()).isTrue();
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(5);
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackContext()).isNull();
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
