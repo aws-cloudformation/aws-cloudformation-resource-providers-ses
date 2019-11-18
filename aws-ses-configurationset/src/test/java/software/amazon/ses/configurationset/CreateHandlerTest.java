@@ -1,7 +1,13 @@
 package software.amazon.ses.configurationset;
 
 import com.amazonaws.AmazonServiceException;
+import software.amazon.awssdk.services.ses.model.CreateConfigurationSetRequest;
+import software.amazon.awssdk.services.ses.model.DescribeConfigurationSetRequest;
+import software.amazon.awssdk.services.ses.model.InvalidConfigurationSetException;
+import software.amazon.awssdk.services.ses.model.LimitExceededException;
 import software.amazon.cloudformation.exceptions.CfnAlreadyExistsException;
+import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
+import software.amazon.cloudformation.exceptions.CfnServiceLimitExceededException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.OperationStatus;
@@ -9,9 +15,9 @@ import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.services.ses.model.ConfigurationSet;
 import software.amazon.awssdk.services.ses.model.ConfigurationSetAlreadyExistsException;
@@ -23,9 +29,9 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static software.amazon.ses.configurationset.Matchers.assertThatModelsAreEqual;
 
 @ExtendWith(MockitoExtension.class)
 public class CreateHandlerTest {
@@ -48,8 +54,8 @@ public class CreateHandlerTest {
         .doReturn(createResponse)
             .when(proxy)
             .injectCredentialsAndInvokeV2(
-                ArgumentMatchers.any(),
-                ArgumentMatchers.any()
+                any(),
+                any()
             );
 
         final ResourceModel model = ResourceModel.builder()
@@ -63,10 +69,8 @@ public class CreateHandlerTest {
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, null, logger);
 
         assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.IN_PROGRESS);
-        assertThat(response.getCallbackContext()).isNotNull();
-        assertThat(response.getCallbackContext().getIsStabilization()).isTrue();
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(5);
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackContext()).isNull();
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getResourceModel()).isEqualTo(model);
         assertThat(response.getMessage()).isNull();
@@ -82,8 +86,8 @@ public class CreateHandlerTest {
         .doThrow(SdkException.builder().message("test error").build())
             .when(proxy)
             .injectCredentialsAndInvokeV2(
-                ArgumentMatchers.any(),
-                ArgumentMatchers.any()
+                any(),
+                any()
             );
 
         final ResourceModel model = ResourceModel.builder()
@@ -108,8 +112,8 @@ public class CreateHandlerTest {
             .doThrow(new AmazonServiceException("test error"))
             .when(proxy)
             .injectCredentialsAndInvokeV2(
-                ArgumentMatchers.any(),
-                ArgumentMatchers.any()
+                any(),
+                any()
             );
 
         final ResourceModel model = ResourceModel.builder()
@@ -126,46 +130,6 @@ public class CreateHandlerTest {
     }
 
     @Test
-    public void handleRequest_Stabilize() {
-        final CreateHandler handler = new CreateHandler();
-
-        final CallbackContext callbackContext = CallbackContext.builder()
-            .isStabilization(true)
-            .build();
-
-        final ConfigurationSet set = ConfigurationSet.builder().name("test-set").build();
-        final DescribeConfigurationSetResponse describeResponse = DescribeConfigurationSetResponse.builder()
-            .configurationSet(set)
-            .build();
-
-        doReturn(describeResponse)
-            .when(proxy)
-            .injectCredentialsAndInvokeV2(
-                ArgumentMatchers.any(),
-                ArgumentMatchers.any()
-            );
-
-        final ResourceModel model = ResourceModel.builder()
-            .name("test-set")
-            .build();
-
-        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-            .desiredResourceState(model)
-            .build();
-
-        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, callbackContext, logger);
-
-        assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
-        assertThat(response.getCallbackContext()).isNull();
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response.getResourceModels()).isNull();
-        assertThatModelsAreEqual(response.getResourceModel(), set);
-        assertThat(response.getMessage()).isNull();
-        assertThat(response.getErrorCode()).isNull();
-    }
-
-    @Test
     public void handleRequest_FailedPreExisting() {
         final CreateHandler handler = new CreateHandler();
 
@@ -177,8 +141,8 @@ public class CreateHandlerTest {
         doReturn(describeResponse)
             .when(proxy)
             .injectCredentialsAndInvokeV2(
-                ArgumentMatchers.any(),
-                ArgumentMatchers.any()
+                any(),
+                any()
             );
 
         final ResourceModel model = ResourceModel.builder()
@@ -199,13 +163,10 @@ public class CreateHandlerTest {
         final CreateHandler handler = new CreateHandler();
 
         // doesn't exist when we check, but timing wins the day and it exists after create
-        doThrow(ConfigurationSetDoesNotExistException.class)
-        .doThrow(ConfigurationSetAlreadyExistsException.class)
-            .when(proxy)
-            .injectCredentialsAndInvokeV2(
-                ArgumentMatchers.any(),
-                ArgumentMatchers.any()
-            );
+        doThrow(ConfigurationSetDoesNotExistException.class).when(proxy)
+                .injectCredentialsAndInvokeV2(any(DescribeConfigurationSetRequest.class), any());
+        doThrow(ConfigurationSetAlreadyExistsException.class).when(proxy)
+                .injectCredentialsAndInvokeV2(any(CreateConfigurationSetRequest.class), any());
 
         final ResourceModel model = ResourceModel.builder()
             .name("test-set")
@@ -216,6 +177,50 @@ public class CreateHandlerTest {
             .build();
 
         assertThrows(CfnAlreadyExistsException.class, () -> {
+            handler.handleRequest(proxy, request, null, logger);
+        });
+    }
+
+    @Test
+    public void handleRequest_FailWith_InvalidConfigurationSetException() {
+        final CreateHandler handler = new CreateHandler();
+
+        doThrow(ConfigurationSetDoesNotExistException.class).when(proxy)
+                .injectCredentialsAndInvokeV2(any(DescribeConfigurationSetRequest.class), any());
+        doThrow(InvalidConfigurationSetException.class).when(proxy)
+                .injectCredentialsAndInvokeV2(any(CreateConfigurationSetRequest.class), any());
+
+        final ResourceModel model = ResourceModel.builder()
+                .name("test-set")
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        assertThrows(CfnInvalidRequestException.class, () -> {
+            handler.handleRequest(proxy, request, null, logger);
+        });
+    }
+
+    @Test
+    public void handleRequest_FailWith_LimitExceededException() {
+        final CreateHandler handler = new CreateHandler();
+
+        doThrow(ConfigurationSetDoesNotExistException.class).when(proxy)
+                .injectCredentialsAndInvokeV2(any(DescribeConfigurationSetRequest.class), any());
+        doThrow(LimitExceededException.class).when(proxy)
+                .injectCredentialsAndInvokeV2(any(CreateConfigurationSetRequest.class), any());
+
+        final ResourceModel model = ResourceModel.builder()
+                .name("test-set")
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        assertThrows(CfnServiceLimitExceededException.class, () -> {
             handler.handleRequest(proxy, request, null, logger);
         });
     }
@@ -232,8 +237,8 @@ public class CreateHandlerTest {
             .doReturn(createResponse)
             .when(proxy)
             .injectCredentialsAndInvokeV2(
-                ArgumentMatchers.any(),
-                ArgumentMatchers.any()
+                any(),
+                any()
             );
 
         // no name supplied; should be generated
@@ -248,10 +253,8 @@ public class CreateHandlerTest {
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, null, logger);
 
         assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.IN_PROGRESS);
-        assertThat(response.getCallbackContext()).isNotNull();
-        assertThat(response.getCallbackContext().getIsStabilization()).isTrue();
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(5);
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackContext()).isNull();
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();

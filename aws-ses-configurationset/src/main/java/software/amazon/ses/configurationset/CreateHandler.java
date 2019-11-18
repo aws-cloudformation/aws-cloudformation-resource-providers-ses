@@ -13,7 +13,6 @@ import com.amazonaws.util.StringUtils;
 import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.ConfigurationSet;
 import software.amazon.awssdk.services.ses.model.ConfigurationSetAlreadyExistsException;
-import software.amazon.awssdk.services.ses.model.ConfigurationSetDoesNotExistException;
 import software.amazon.awssdk.services.ses.model.CreateConfigurationSetRequest;
 import software.amazon.awssdk.services.ses.model.InvalidConfigurationSetException;
 import software.amazon.awssdk.services.ses.model.LimitExceededException;
@@ -24,32 +23,14 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
 
     public static final int MAX_LENGTH_CONFIGURATION_SET_NAME = 64;
 
-    private AmazonWebServicesClientProxy proxy;
-    private SesClient client;
-    private Logger logger;
-
     @Override
     public ProgressEvent<ResourceModel, CallbackContext> handleRequest(
         final AmazonWebServicesClientProxy proxy,
         final ResourceHandlerRequest<ResourceModel> request,
         final CallbackContext callbackContext,
         final Logger logger) {
-        this.proxy = proxy;
-        this.client = ClientBuilder.getClient();
-        this.logger = logger;
-
-        if (callbackContext != null && callbackContext.getIsStabilization()) {
-            return stabilizeConfigurationSet(proxy, callbackContext, request);
-        } else {
-            return createConfigurationSet(proxy, request);
-        }
-    }
-
-    private ProgressEvent<ResourceModel, CallbackContext> createConfigurationSet(
-        final AmazonWebServicesClientProxy proxy,
-        final ResourceHandlerRequest<ResourceModel> request) {
-
-        ResourceModel model = request.getDesiredResourceState();
+        final SesClient client = ClientBuilder.getClient();
+        final ResourceModel model = request.getDesiredResourceState();
 
         // resource can auto-generate a name if not supplied by caller
         // this logic should move up into the CloudFormation engine, but
@@ -66,7 +47,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
 
         // pre-creation read to ensure no existing resource exists
         try {
-            new ReadHandler().handleRequest(proxy, request, null, this.logger);
+            new ReadHandler().handleRequest(proxy, request, null, logger);
             throw new CfnAlreadyExistsException(ResourceModel.TYPE_NAME, model.getName());
         } catch (final CfnNotFoundException e) {
             // no existing resource, creation can proceed
@@ -79,7 +60,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                         .build())
                     .build();
         try {
-            proxy.injectCredentialsAndInvokeV2(createConfigurationSetRequest, this.client::createConfigurationSet);
+            proxy.injectCredentialsAndInvokeV2(createConfigurationSetRequest, client::createConfigurationSet);
             logger.log(String.format("%s [%s] created successfully",
                 ResourceModel.TYPE_NAME, getPrimaryIdentifier(model).toString()));
         } catch (ConfigurationSetAlreadyExistsException e) {
@@ -90,33 +71,6 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
             throw new CfnServiceLimitExceededException(ResourceModel.TYPE_NAME, e.toString());
         }
 
-        CallbackContext stabilizationContext = CallbackContext.builder()
-            .isStabilization(true)
-            .build();
-        return ProgressEvent.defaultInProgressHandler(
-            stabilizationContext,
-            5,
-            model);
-    }
-
-    private ProgressEvent<ResourceModel, CallbackContext> stabilizeConfigurationSet(
-        final AmazonWebServicesClientProxy proxy,
-        final CallbackContext callbackContext,
-        final ResourceHandlerRequest<ResourceModel> request) {
-        ResourceModel model = request.getDesiredResourceState();
-
-        // read to ensure resource exists
-        try {
-            final ProgressEvent<ResourceModel, CallbackContext> readResult =
-                new ReadHandler().handleRequest(proxy, request, null, this.logger);
-            return ProgressEvent.defaultSuccessHandler(readResult.getResourceModel());
-        } catch (final ConfigurationSetDoesNotExistException e) {
-            // resource not yet found, re-invoke
-        }
-
-        return ProgressEvent.defaultInProgressHandler(
-            callbackContext,
-            5,
-            model);
+        return ProgressEvent.defaultSuccessHandler(model);
     }
 }
