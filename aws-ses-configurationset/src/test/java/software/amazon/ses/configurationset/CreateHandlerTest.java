@@ -49,15 +49,6 @@ public class CreateHandlerTest {
         final CreateConfigurationSetResponse createResponse = CreateConfigurationSetResponse.builder()
             .build();
 
-        // throw for pre-describe and then return response for create
-        doThrow(ConfigurationSetDoesNotExistException.class)
-        .doReturn(createResponse)
-            .when(proxy)
-            .injectCredentialsAndInvokeV2(
-                any(),
-                any()
-            );
-
         final ResourceModel model = ResourceModel.builder()
             .name("test-set")
             .build();
@@ -81,9 +72,7 @@ public class CreateHandlerTest {
     public void handleRequest_FailedCreate_UnknownError() {
         final CreateHandler handler = new CreateHandler();
 
-        // throw for pre-describe and then throw arbitrary error which should propagate to be handled by wrapper
-        doThrow(ConfigurationSetDoesNotExistException.class)
-        .doThrow(SdkException.builder().message("test error").build())
+        doThrow(SdkException.builder().message("test error").build())
             .when(proxy)
             .injectCredentialsAndInvokeV2(
                 any(),
@@ -107,9 +96,7 @@ public class CreateHandlerTest {
     public void handleRequest_FailedCreate_AmazonServiceException() {
         final CreateHandler handler = new CreateHandler();
 
-        // AmazonServiceExceptions should be thrown so they can be handled by wrapper
-        doThrow(ConfigurationSetDoesNotExistException.class)
-            .doThrow(new AmazonServiceException("test error"))
+        doThrow(new AmazonServiceException("test error"))
             .when(proxy)
             .injectCredentialsAndInvokeV2(
                 any(),
@@ -133,38 +120,6 @@ public class CreateHandlerTest {
     public void handleRequest_FailedPreExisting() {
         final CreateHandler handler = new CreateHandler();
 
-        final ConfigurationSet set = ConfigurationSet.builder().name("test-set").build();
-        final DescribeConfigurationSetResponse describeResponse = DescribeConfigurationSetResponse.builder()
-            .configurationSet(set)
-            .build();
-
-        doReturn(describeResponse)
-            .when(proxy)
-            .injectCredentialsAndInvokeV2(
-                any(),
-                any()
-            );
-
-        final ResourceModel model = ResourceModel.builder()
-            .name("test-set")
-            .build();
-
-        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-            .desiredResourceState(model)
-            .build();
-
-        assertThrows(CfnAlreadyExistsException.class, () -> {
-            handler.handleRequest(proxy, request, null, logger);
-        });
-    }
-
-    @Test
-    public void handleRequest_FailedPreExisting_AfterDescribeCheck() {
-        final CreateHandler handler = new CreateHandler();
-
-        // doesn't exist when we check, but timing wins the day and it exists after create
-        doThrow(ConfigurationSetDoesNotExistException.class).when(proxy)
-                .injectCredentialsAndInvokeV2(any(DescribeConfigurationSetRequest.class), any());
         doThrow(ConfigurationSetAlreadyExistsException.class).when(proxy)
                 .injectCredentialsAndInvokeV2(any(CreateConfigurationSetRequest.class), any());
 
@@ -185,8 +140,6 @@ public class CreateHandlerTest {
     public void handleRequest_FailWith_InvalidConfigurationSetException() {
         final CreateHandler handler = new CreateHandler();
 
-        doThrow(ConfigurationSetDoesNotExistException.class).when(proxy)
-                .injectCredentialsAndInvokeV2(any(DescribeConfigurationSetRequest.class), any());
         doThrow(InvalidConfigurationSetException.class).when(proxy)
                 .injectCredentialsAndInvokeV2(any(CreateConfigurationSetRequest.class), any());
 
@@ -207,8 +160,6 @@ public class CreateHandlerTest {
     public void handleRequest_FailWith_LimitExceededException() {
         final CreateHandler handler = new CreateHandler();
 
-        doThrow(ConfigurationSetDoesNotExistException.class).when(proxy)
-                .injectCredentialsAndInvokeV2(any(DescribeConfigurationSetRequest.class), any());
         doThrow(LimitExceededException.class).when(proxy)
                 .injectCredentialsAndInvokeV2(any(CreateConfigurationSetRequest.class), any());
 
@@ -231,15 +182,6 @@ public class CreateHandlerTest {
 
         final CreateConfigurationSetResponse createResponse = CreateConfigurationSetResponse.builder()
             .build();
-
-        // throw for pre-describe and then return response for create
-        doThrow(ConfigurationSetDoesNotExistException.class)
-            .doReturn(createResponse)
-            .when(proxy)
-            .injectCredentialsAndInvokeV2(
-                any(),
-                any()
-            );
 
         // no name supplied; should be generated
         final ResourceModel model = ResourceModel.builder().build();

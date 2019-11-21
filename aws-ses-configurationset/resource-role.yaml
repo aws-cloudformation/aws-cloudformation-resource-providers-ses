@@ -23,10 +23,10 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                - "ses:ListConfigurationSets"
                 - "ses:CreateConfigurationSet"
                 - "ses:DeleteConfigurationSet"
                 - "ses:DescribeConfigurationSet"
+                - "ses:ListConfigurationSets"
                 Resource: "*"
 Outputs:
   ExecutionRoleArn:

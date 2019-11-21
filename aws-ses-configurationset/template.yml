@@ -11,13 +11,13 @@ Resources:
   TypeFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: com.aws.ses.configurationset.HandlerWrapper::handleRequest
+      Handler: software.amazon.ses.configurationset.HandlerWrapper::handleRequest
       Runtime: java8
       CodeUri: ./target/aws-ses-configurationset-handler-1.0-SNAPSHOT.jar
 
   TestEntrypoint:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: com.aws.ses.configurationset.HandlerWrapper::testEntrypoint
+      Handler: software.amazon.ses.configurationset.HandlerWrapper::testEntrypoint
       Runtime: java8
       CodeUri: ./target/aws-ses-configurationset-handler-1.0-SNAPSHOT.jar

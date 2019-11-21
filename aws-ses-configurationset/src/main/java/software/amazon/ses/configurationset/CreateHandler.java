@@ -45,14 +45,6 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
             );
         }
 
-        // pre-creation read to ensure no existing resource exists
-        try {
-            new ReadHandler().handleRequest(proxy, request, null, logger);
-            throw new CfnAlreadyExistsException(ResourceModel.TYPE_NAME, model.getName());
-        } catch (final CfnNotFoundException e) {
-            // no existing resource, creation can proceed
-        }
-
         final CreateConfigurationSetRequest createConfigurationSetRequest =
                 CreateConfigurationSetRequest.builder()
                     .configurationSet(ConfigurationSet.builder()
