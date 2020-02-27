@@ -7,9 +7,7 @@ import software.amazon.awssdk.services.ses.SesClient;
 class ClientBuilder {
     static SesClient getClient() {
         return SesClient.builder()
-            .overrideConfiguration(ClientOverrideConfiguration.builder()
-                .retryPolicy(RetryPolicy.builder().numRetries(8).build())
-                .build())
+            .httpClient(LambdaWrapper.HTTP_CLIENT)
             .build();
     }
 }
