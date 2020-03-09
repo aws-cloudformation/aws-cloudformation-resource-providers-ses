@@ -1,7 +1,6 @@
-exclude: ^(buildspec.yml|.pre-commit-config.yaml)$
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v2.0.0
+  rev: v2.4.0
   hooks:
   - id: check-case-conflict
   - id: detect-private-key
@@ -16,3 +15,4 @@ repos:
     - --indent=4
     - --no-sort-keys
   - id: check-merge-conflict
+  - id: check-yaml
