@@ -1,0 +1,82 @@
+{
+  "typeName": "AWS::SES::ReceiptFilter",
+  "description": "Resource Type definition for AWS::SES::ReceiptFilter",
+  "additionalProperties": false,
+  "properties": {
+    "Id": {
+      "type": "string"
+    },
+    "Filter": {
+      "$ref": "#/definitions/Filter"
+    }
+  },
+  "definitions": {
+    "Filter": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "IpFilter": {
+          "$ref": "#/definitions/IpFilter"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "IpFilter"
+      ]
+    },
+    "IpFilter": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Policy": {
+          "type": "string"
+        },
+        "Cidr": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Policy",
+        "Cidr"
+      ]
+    }
+  },
+  "handlers": {
+    "create": {
+      "permissions": [
+        "ses:ListReceiptFilters ",
+        "ses:CreateReceiptFilter"
+      ]
+    },
+    "delete": {
+      "permissions": [
+        "ses:ListReceiptFilters",
+        "ses:DeleteReceiptFilter "
+      ]
+    },
+    "list": {
+      "permissions": [
+        "ses:ListReceiptFilters"
+      ]
+    },
+    "read": {
+      "permissions": [
+        "ses:ListReceiptFilters"
+      ]
+    }
+  },
+  "required": [
+    "Filter"
+  ],
+  "createOnlyProperties": [
+    "/properties/Filter"
+  ],
+  "primaryIdentifier": [
+    "/properties/Id"
+  ],
+  "readOnlyProperties": [
+    "/properties/Id"
+  ]
+}

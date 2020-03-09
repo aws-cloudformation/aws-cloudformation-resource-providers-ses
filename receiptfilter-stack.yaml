@@ -1,0 +1,11 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'AWS SES ReceiptFilter Sample Template'
+Resources:
+  ReceiptFilter:
+    Type: AWS::SES::ReceiptFilter
+    Properties:
+      Filter:
+        Name: MyFilter
+        IpFilter:
+          Policy: Allow
+          Cidr: 10.0.0.0/24
